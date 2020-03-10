@@ -1,3 +1,5 @@
+package data;
+
 import java.util.List;
 
 public class RisksDTO {
@@ -26,5 +28,13 @@ public class RisksDTO {
 
     public void setErrors(List<Error> errors) {
         this.errors = errors;
+    }
+
+    @Override
+    public String toString() {
+        return "data.RisksDTO{" +
+                "risks=" + risks +
+                ", errors=" + errors +
+                '}';
     }
 }

@@ -1,3 +1,5 @@
+package data;
+
 import java.util.Date;
 
 public class Risk {
@@ -187,7 +189,7 @@ public class Risk {
 
     @Override
     public String toString() {
-        return "RisksDTO{" +
+        return "data.RisksDTO{" +
                 ", riskDisplayId='" + riskDisplayId + '\'' +
                 ", impact=" + impact +
                 ", probability='" + probability + '\'' +

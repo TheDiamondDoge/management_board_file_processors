@@ -1,3 +1,5 @@
+package data;
+
 public class Error {
     private int cellIndex;
     private int rowIndex;
@@ -34,5 +36,14 @@ public class Error {
 
     public void setMessage(String message) {
         this.message = message;
+    }
+
+    @Override
+    public String toString() {
+        return "data.Error{" +
+                "cellIndex=" + cellIndex +
+                ", rowIndex=" + rowIndex +
+                ", message='" + message + '\'' +
+                '}';
     }
 }

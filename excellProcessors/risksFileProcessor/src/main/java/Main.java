@@ -1,3 +1,6 @@
+import data.RisksDTO;
+import service.RisksExtractor;
+
 public class Main {
     public static void main(String[] args) {
         RisksExtractor risksExtractor = new RisksExtractor("src/main/resources/risks.xlsx");
