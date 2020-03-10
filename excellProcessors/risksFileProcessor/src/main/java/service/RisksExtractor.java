@@ -3,23 +3,22 @@ package service;
 import data.Error;
 import data.Risk;
 import data.RisksDTO;
-import exceptions.TooLongStringException;
-import exceptions.WrongDateFormat;
-import exceptions.WrongImpactValueException;
-import exceptions.WrongNumberFormat;
+import exceptions.*;
+import org.apache.poi.openxml4j.exceptions.NotOfficeXmlFileException;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.XSSFFormulaEvaluator;
-import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import util.Utils;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.IOException;
 import java.util.*;
 
 public class RisksExtractor {
     private static final List<Integer> NUMERIC_CELLS_INDEXES = Arrays.asList(0, 1, 2, 3, 4);
     private static final List<Integer> DATE_CELLS_INDEXES = Arrays.asList(11, 16, 17, 18);
     private static final String SHEET_NAME = "Risks";
+    public static final int ROW_TO_START = 7;
 
     private String path;
     private List<Error> errors;
@@ -29,18 +28,23 @@ public class RisksExtractor {
         this.path = path;
     }
 
-    public RisksDTO extract() {
+    public RisksDTO extract() throws IOException, NoSheetFoundException, WrongFileFormat {
         try {
             if (Objects.isNull(errors)) errors = new ArrayList<>();
             if (Objects.isNull(risks)) risks = new ArrayList<>();
 
             File file = new File(this.path);
             FileInputStream fis = new FileInputStream(file);
-            XSSFWorkbook workbook = new XSSFWorkbook(fis);
+            Workbook workbook = Utils.workbookFactory(this.path, fis);
             XSSFFormulaEvaluator.evaluateAllFormulaCells(workbook);
             Sheet sheet = workbook.getSheet(SHEET_NAME);
+
+            if (Objects.isNull(sheet)) {
+                throw new NoSheetFoundException(SHEET_NAME);
+            }
+
             Iterator<Row> rowIterator = sheet.rowIterator();
-            Utils.setIteratorsPosition(rowIterator, 7);
+            Utils.setIteratorsPosition(rowIterator, ROW_TO_START);
 
             FormulaEvaluator evaluator = workbook.getCreationHelper().createFormulaEvaluator();
 
@@ -62,8 +66,8 @@ public class RisksExtractor {
 
                 if (this.isEndOfRisksTable(row)) break;
             }
-        } catch (Exception e) {
-            e.printStackTrace();
+        } catch(NotOfficeXmlFileException e) {
+            throw new WrongFileFormat();
         }
 
         return new RisksDTO(risks, errors);

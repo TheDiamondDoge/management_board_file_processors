@@ -1,12 +1,18 @@
 package util;
 
+import exceptions.TooLongStringException;
 import exceptions.WrongDateFormat;
 import exceptions.WrongImpactValueException;
 import exceptions.WrongNumberFormat;
+import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellType;
 import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
+import java.io.FileInputStream;
+import java.io.IOException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -14,9 +20,25 @@ import java.util.Iterator;
 import java.util.Objects;
 
 public class Utils {
-    public static void checkStringSize(String target, int maxSize) throws Exception {
+    public static Workbook workbookFactory(String path, FileInputStream fis) throws IOException {
+        int i = path.lastIndexOf('.');
+        String ext = "";
+        if (i > 0) {
+            ext = path.substring(i + 1);
+        }
+
+        switch (ext.toLowerCase()) {
+            case "xls":
+                return new HSSFWorkbook(fis);
+            case "xlsx":
+            default:
+                return new XSSFWorkbook(fis);
+        }
+    }
+
+    public static void checkStringSize(String target, int maxSize) throws TooLongStringException {
         if (target.length() > maxSize) {
-            throw new WrongImpactValueException("String should be less than " + maxSize + " symbols long");
+            throw new TooLongStringException("String should be less than " + maxSize + " symbols long");
         }
     }
 
