@@ -136,4 +136,33 @@ public class RisksExtractorTest {
         assertEquals(16, errors.get(3).getCellIndex());
         assertTrue(Objects.nonNull(errors.get(3).getMessage()));
     }
+
+    @Test
+    public void stringsWithExceededLengthLimit_errDataFlagSet_errMsgSaved() throws WrongFileFormat, IOException, NoSheetFoundException {
+        RisksExtractor extractor = new RisksExtractor("src/test/resources/risks-strings-with-exceeded-limits.xlsx");
+        RisksDTO data = extractor.extract();
+
+        int expectedRisksAmount = 6;
+        List<Risk> risks = data.getRisks();
+        assertEquals(expectedRisksAmount, risks.size());
+
+        int expectedErrorsAmount = 4;
+        List<Error> errors = data.getErrors();
+        assertEquals(expectedErrorsAmount, errors.size());
+        assertEquals(7, errors.get(0).getRowIndex());
+        assertEquals(9, errors.get(0).getCellIndex());
+        assertTrue(Objects.nonNull(errors.get(0).getMessage()));
+
+        assertEquals(7, errors.get(1).getRowIndex());
+        assertEquals(12, errors.get(1).getCellIndex());
+        assertTrue(Objects.nonNull(errors.get(1).getMessage()));
+
+        assertEquals(7, errors.get(2).getRowIndex());
+        assertEquals(13, errors.get(2).getCellIndex());
+        assertTrue(Objects.nonNull(errors.get(2).getMessage()));
+
+        assertEquals(7, errors.get(3).getRowIndex());
+        assertEquals(14, errors.get(3).getCellIndex());
+        assertTrue(Objects.nonNull(errors.get(3).getMessage()));
+    }
 }
