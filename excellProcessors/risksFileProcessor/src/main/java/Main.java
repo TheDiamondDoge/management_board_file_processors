@@ -7,9 +7,9 @@ import java.io.IOException;
 
 public class Main {
     public static void main(String[] args) throws IOException, NoSheetFoundException, WrongFileFormat {
-        RisksExtractor risksExtractor = new RisksExtractor("src/main/resources/risks.xlsx");
-        RisksDTO risksDTO = risksExtractor.extract();
-
-        System.out.println(risksDTO);
+//        RisksExtractor risksExtractor = new RisksExtractor("src/main/resources/risks.xlsx");
+//        RisksDTO risksDTO = risksExtractor.extract();
+//
+//        System.out.println(risksDTO);
     }
 }

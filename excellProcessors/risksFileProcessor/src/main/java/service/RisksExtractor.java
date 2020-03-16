@@ -187,7 +187,7 @@ public class RisksExtractor {
                 errors.add(new Error(cellId, cell.getRowIndex(), errMessage));
             } catch (TooLongStringException lengthEx) {
                 String errMessage = lengthEx.getMessage();
-                this.setErrorStringIndicator(riskPointer, cellId, errMessage);
+                this.setErrorStringIndicator(riskPointer, cellId);
                 errors.add(new Error(cellId, cell.getRowIndex(), errMessage));
             } catch (WrongDateFormat dateEx) {
                 this.setErrorDateIndicator(riskPointer, cellId);
@@ -235,7 +235,8 @@ public class RisksExtractor {
         }
     }
 
-    private void setErrorStringIndicator(Risk riskPointer, int cellId, String message) {
+    private void setErrorStringIndicator(Risk riskPointer, int cellId) {
+        String message = "Error";
         switch (cellId) {
             case 9:
                 riskPointer.setRiskResponse(message);
