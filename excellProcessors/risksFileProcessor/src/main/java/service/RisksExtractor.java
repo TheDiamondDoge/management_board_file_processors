@@ -29,12 +29,13 @@ public class RisksExtractor {
     }
 
     public RisksDTO extract() throws IOException, NoSheetFoundException, WrongFileFormat {
+        FileInputStream fis = null;
         try {
             if (Objects.isNull(errors)) errors = new ArrayList<>();
             if (Objects.isNull(risks)) risks = new ArrayList<>();
 
             File file = new File(this.path);
-            FileInputStream fis = new FileInputStream(file);
+            fis = new FileInputStream(file);
             Workbook workbook = Utils.workbookFactory(this.path, fis);
             XSSFFormulaEvaluator.evaluateAllFormulaCells(workbook);
             Sheet sheet = workbook.getSheet(SHEET_NAME);
@@ -68,6 +69,10 @@ public class RisksExtractor {
             }
         } catch(NotOfficeXmlFileException e) {
             throw new WrongFileFormat();
+        } finally {
+            if (Objects.nonNull(fis)) {
+                fis.close();
+            }
         }
 
         return new RisksDTO(risks, errors);
