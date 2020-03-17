@@ -12,9 +12,14 @@ import java.util.Date;
 import java.util.List;
 import java.util.Objects;
 
+//TODO: template should be in resources
+//TODO: tests
+//TODO: cleanup
+//TODO: round probability to 1 trailing digit
 public class RisksFileGenerator {
+    static final ClassLoader loader = RisksFileGenerator.class.getClassLoader();
     private final int firstRowIndex = 5;
-    private final String templatePath = "src/main/resources/risks_template.xlsx";
+    private final String templatePath = "D:\\git\\management_board_file_processors\\excellProcessors\\risks_template.xlsx";
     private String exportDirectoryPath;
     private XSSFWorkbook workbook;
     private XSSFRow row;
