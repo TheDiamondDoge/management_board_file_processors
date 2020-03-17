@@ -1,8 +1,3 @@
-import exceptions.NoSheetFoundException;
-import exceptions.WrongFileFormat;
-
-import java.io.IOException;
-
 public class Main {
     public static void main(String[] args) {
 //        RisksExtractor risksExtractor = new RisksExtractor("src/main/resources/risks_template.xlsx");
