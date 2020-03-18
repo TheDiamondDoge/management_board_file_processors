@@ -19,21 +19,19 @@ public class RisksFileGenerator {
     private static final String FILE_PREFIX = "_riskExport.xlsx";
     private static final String FONT_NAME = "FuturaA Book BT";
 
-    private String templatePath;
+    private InputStream templateFile;
     private String exportDirectoryPath;
     private XSSFWorkbook workbook;
     private XSSFRow row;
 
     public RisksFileGenerator(String exportDirectoryPath) {
         this.exportDirectoryPath = exportDirectoryPath;
-        this.templatePath = getClass().getClassLoader().getResource(TEMPLATE_RESOURCE).getPath();
     }
 
     public String generateXlsxFile(List<Risk> risks, String projectName) throws IOException, WrongFileFormat, NoSheetFoundException {
         try {
-            File file = new File(this.templatePath);
-            FileInputStream fis = new FileInputStream(file);
-            workbook = new XSSFWorkbook(fis);
+            templateFile = getClass().getClassLoader().getResourceAsStream(TEMPLATE_RESOURCE);
+            workbook = new XSSFWorkbook(templateFile);
             XSSFFormulaEvaluator.evaluateAllFormulaCells(workbook);
             XSSFSheet sheet = workbook.getSheet(SHEET_NAME);
 
@@ -77,7 +75,7 @@ public class RisksFileGenerator {
             FileOutputStream fileOutputStream = new FileOutputStream(filepath);
             workbook.write(fileOutputStream);
             workbook.close();
-            fis.close();
+            templateFile.close();
 
             return filepath;
         } catch (FileNotFoundException e) {
