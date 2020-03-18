@@ -5,79 +5,28 @@ import exceptions.NoSheetFoundException;
 import exceptions.WrongFileFormat;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.*;
+import util.Utils;
 
 import java.io.*;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Objects;
 
-//TODO: template should be in resources
-//TODO: tests
-//TODO: cleanup
-//TODO: round probability to 1 trailing digit
 public class RisksFileGenerator {
-    static final ClassLoader loader = RisksFileGenerator.class.getClassLoader();
-    private final int firstRowIndex = 5;
-    private final String templatePath = "D:\\git\\management_board_file_processors\\excellProcessors\\risks_template.xlsx";
+    private static final int FIRST_ROW_INDEX = 5;
+    private static final String SHEET_NAME = "Risks";
+    private static final String TEMPLATE_RESOURCE = "risks_template.xlsx";
+    private static final String FILE_PREFIX = "_riskExport.xlsx";
+    private static final String FONT_NAME = "FuturaA Book BT";
+
+    private String templatePath;
     private String exportDirectoryPath;
     private XSSFWorkbook workbook;
     private XSSFRow row;
 
     public RisksFileGenerator(String exportDirectoryPath) {
         this.exportDirectoryPath = exportDirectoryPath;
-    }
-
-    public List<Risk> getMockList() {
-        List<Risk> risks = new ArrayList<>();
-        Risk risk1 = new Risk();
-        risk1.setRiskDisplayId("1");
-        risk1.setImpact(1);
-        risk1.setProbability(1f);
-        risk1.setRating(1f);
-        risk1.setPrevious(1f);
-        risk1.setInitial(1f);
-        risk1.setRiskDescription("desrc");
-        risk1.setImpactDescription("impact descr");
-        risk1.setBusinessImpact("business impact");
-        risk1.setRiskResponse("response");
-        risk1.setMitigation("mitigationmitigationmitigationmitigationmitigationmitigationmitigationmitigationmitigationmitigationmitigation");
-        risk1.setDecisionDate(new Date());
-        risk1.setEstimatedCost("est cost");
-        risk1.setProvisionBudget("prov budg");
-        risk1.setResponsible("responsib");
-        risk1.setRelatedAction("related action");
-        risk1.setTarget(new Date());
-        risk1.setDone(new Date());
-        risk1.setResult(new Date());
-        risk1.setReport(true);
-
-        Risk risk2 = new Risk();
-        risk2.setRiskDisplayId("2");
-        risk2.setImpact(2);
-        risk2.setProbability(2f);
-        risk2.setRating(2f);
-        risk2.setPrevious(2f);
-        risk2.setInitial(2f);
-        risk2.setRiskDescription("desrc2");
-        risk2.setImpactDescription("impact descr2");
-        risk2.setBusinessImpact("business impact2");
-        risk2.setRiskResponse("response2");
-        risk2.setMitigation("mitigation2");
-        risk2.setDecisionDate(new Date());
-        risk2.setEstimatedCost("est cost2");
-        risk2.setProvisionBudget("prov budg2");
-        risk2.setResponsible("responsib2");
-        risk2.setRelatedAction("related action2");
-        risk2.setTarget(new Date());
-        risk2.setDone(new Date());
-        risk2.setResult(new Date());
-        risk2.setReport(false);
-
-        risks.add(risk1);
-        risks.add(risk2);
-
-        return risks;
+        this.templatePath = getClass().getClassLoader().getResource(TEMPLATE_RESOURCE).getPath();
     }
 
     public String generateXlsxFile(List<Risk> risks, String projectName) throws IOException, WrongFileFormat, NoSheetFoundException {
@@ -86,22 +35,22 @@ public class RisksFileGenerator {
             FileInputStream fis = new FileInputStream(file);
             workbook = new XSSFWorkbook(fis);
             XSSFFormulaEvaluator.evaluateAllFormulaCells(workbook);
-            XSSFSheet sheet = workbook.getSheet("Risks");
+            XSSFSheet sheet = workbook.getSheet(SHEET_NAME);
 
             if (Objects.isNull(sheet)) {
-                throw new NoSheetFoundException("Risks");
+                throw new NoSheetFoundException(SHEET_NAME);
             }
 
             workbook.setSheetName(workbook.getSheetIndex(sheet), projectName);
 
-            int lastRowIndex = firstRowIndex + risks.size();
-            for (int i = firstRowIndex; i < lastRowIndex; i++) {
-                Risk risk = risks.get(i - firstRowIndex);
+            int lastRowIndex = FIRST_ROW_INDEX + risks.size();
+            for (int i = FIRST_ROW_INDEX; i < lastRowIndex; i++) {
+                Risk risk = risks.get(i - FIRST_ROW_INDEX);
                 row = sheet.getRow(i);
 
                 this.createCell(0, CellType.NUMERIC).setCellValue(risk.getImpact());
-                this.createCell(1).setCellValue(this.getFormattedProbability(risk.getProbability()));
-                this.createCell(2, CellType.NUMERIC).setCellValue(this.getFormattedRating(risk.getRating()));
+                this.createCell(1).setCellValue(Utils.getFormattedProbability(risk.getProbability()));
+                this.createCell(2, CellType.NUMERIC).setCellValue(Utils.getFormattedRating(risk.getRating()));
                 this.createCell(3, CellType.NUMERIC).setCellValue(risk.getPrevious());
                 this.createCell(4, CellType.NUMERIC).setCellValue(risk.getInitial());
                 this.createCell(5, CellType.STRING).setCellValue(risk.getRiskDisplayId());
@@ -122,7 +71,7 @@ public class RisksFileGenerator {
             }
 
 
-            String filename = new Date().getTime() + "_riskExport.xlsx";
+            String filename = new Date().getTime() + FILE_PREFIX;
             String filepath = exportDirectoryPath + filename;
 
             FileOutputStream fileOutputStream = new FileOutputStream(filepath);
@@ -171,30 +120,10 @@ public class RisksFileGenerator {
 
         XSSFFont font = workbook.createFont();
         font.setFontHeight(8);
-        font.setFontName("FuturaA Book BT");
+        font.setFontName(FONT_NAME);
 
         cellStyle.setFont(font);
 
         return cellStyle;
-    }
-
-    private String getFormattedRating(double rating) {
-        if (rating == 0.0) {
-            return "None";
-        } else if (rating == -1.0) {
-            return "Error";
-        } else if (rating < 6) {
-            return "Low (" + rating + ")";
-        } else if (rating >= 6 && rating <= 10) {
-            return "Moderate (" + rating + ")";
-        } else if (rating > 10) {
-            return "High (" + rating + ")";
-        } else {
-            return "";
-        }
-    }
-
-    private String getFormattedProbability(double probability) {
-        return (probability * 100) + "%";
     }
 }

@@ -84,4 +84,25 @@ public class Utils {
     public static boolean isNullOrEmpty(Cell cell) {
         return Objects.isNull(cell) || cell.getCellType() == CellType.BLANK;
     }
+
+    public static String getFormattedRating(double rating) {
+        if (rating == 0.0) {
+            return "None";
+        } else if (rating == -1.0) {
+            return "Error";
+        } else if (rating < 6) {
+            return "Low (" + rating + ")";
+        } else if (rating >= 6 && rating <= 10) {
+            return "Moderate (" + rating + ")";
+        } else if (rating > 10) {
+            return "High (" + rating + ")";
+        } else {
+            return "";
+        }
+    }
+
+    public static String getFormattedProbability(double probability) {
+        double roundedToTwoDigits = Math.round(probability * 1000.0) / 1000.0;
+        return (roundedToTwoDigits * 100)  + "%";
+    }
 }

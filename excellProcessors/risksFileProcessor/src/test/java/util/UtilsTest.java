@@ -73,4 +73,23 @@ public class UtilsTest {
         assertEquals("As an error indicator 1970-01-01 is used. Should be equals",
                 errorDate, dateToCheck);
     }
+
+    @Test
+    public void getFormattedRatingTest() {
+        assertEquals("None", Utils.getFormattedRating(0));
+        assertEquals("Error", Utils.getFormattedRating(-1));
+        assertEquals("Low (3.0)", Utils.getFormattedRating(3));
+        assertEquals("Moderate (7.0)", Utils.getFormattedRating(7));
+        assertEquals("High (11.0)", Utils.getFormattedRating(11));
+    }
+
+    @Test
+    public void getFormattedProbabilityTest() {
+        assertEquals("0.0%", Utils.getFormattedProbability(0));
+        assertEquals("10.0%", Utils.getFormattedProbability(0.1));
+        assertEquals("37.9%", Utils.getFormattedProbability(0.3785));
+        assertEquals("60.0%", Utils.getFormattedProbability(0.6));
+        assertEquals("100.0%", Utils.getFormattedProbability(1));
+
+    }
 }
