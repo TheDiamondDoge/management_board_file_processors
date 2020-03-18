@@ -68,7 +68,7 @@ public class RisksExtractor {
                 if (this.isEndOfRisksTable(row)) break;
             }
 
-            file.delete();
+//            file.delete();
         } catch(NotOfficeXmlFileException e) {
             throw new WrongFileFormat();
         } finally {

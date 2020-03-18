@@ -85,24 +85,58 @@ public class Utils {
         return Objects.isNull(cell) || cell.getCellType() == CellType.BLANK;
     }
 
-    public static String getFormattedRating(double rating) {
-        if (rating == 0.0) {
+    public static String getFormattedRating(Float rating) {
+        if (Objects.isNull(rating)) return "";
+        if (rating == 0.0f) {
             return "None";
-        } else if (rating == -1.0) {
+        } else if (rating == -1.0f) {
             return "Error";
-        } else if (rating < 6) {
+        } else if (rating < 6f) {
             return "Low (" + rating + ")";
-        } else if (rating >= 6 && rating <= 10) {
+        } else if (rating >= 6f && rating <= 10f) {
             return "Moderate (" + rating + ")";
-        } else if (rating > 10) {
+        } else if (rating > 10f) {
             return "High (" + rating + ")";
         } else {
             return "";
         }
     }
 
-    public static String getFormattedProbability(double probability) {
+    public static String getFormattedProbability(Float probability) {
+        if (Objects.isNull(probability)) return "";
         double roundedToTwoDigits = Math.round(probability * 1000.0) / 1000.0;
         return (roundedToTwoDigits * 100)  + "%";
+    }
+
+    public static void setCellValue(Cell cell, Float value) {
+        if (Objects.nonNull(value)) {
+            cell.setCellValue(value);
+        } else {
+            cell.setCellValue("");
+        }
+    }
+
+    public static void setCellValue(Cell cell, Integer value) {
+        if (Objects.nonNull(value)) {
+            cell.setCellValue(value);
+        } else {
+            cell.setCellValue("");
+        }
+    }
+
+    public static void setCellValue(Cell cell, Date value) {
+        if (Objects.nonNull(value)) {
+            cell.setCellValue(value);
+        } else {
+            cell.setCellValue("");
+        }
+    }
+
+    public static void setCellValue(Cell cell, String value) {
+        if (Objects.nonNull(value)) {
+            cell.setCellValue(value);
+        } else {
+            cell.setCellValue("");
+        }
     }
 }

@@ -76,20 +76,20 @@ public class UtilsTest {
 
     @Test
     public void getFormattedRatingTest() {
-        assertEquals("None", Utils.getFormattedRating(0));
-        assertEquals("Error", Utils.getFormattedRating(-1));
-        assertEquals("Low (3.0)", Utils.getFormattedRating(3));
-        assertEquals("Moderate (7.0)", Utils.getFormattedRating(7));
-        assertEquals("High (11.0)", Utils.getFormattedRating(11));
+        assertEquals("None", Utils.getFormattedRating(0f));
+        assertEquals("Error", Utils.getFormattedRating(-1f));
+        assertEquals("Low (3.0)", Utils.getFormattedRating(3f));
+        assertEquals("Moderate (7.0)", Utils.getFormattedRating(7f));
+        assertEquals("High (11.0)", Utils.getFormattedRating(11f));
     }
 
     @Test
     public void getFormattedProbabilityTest() {
-        assertEquals("0.0%", Utils.getFormattedProbability(0));
-        assertEquals("10.0%", Utils.getFormattedProbability(0.1));
-        assertEquals("37.9%", Utils.getFormattedProbability(0.3785));
-        assertEquals("60.0%", Utils.getFormattedProbability(0.6));
-        assertEquals("100.0%", Utils.getFormattedProbability(1));
+        assertEquals("0.0%", Utils.getFormattedProbability(0f));
+        assertEquals("10.0%", Utils.getFormattedProbability(0.1f));
+        assertEquals("37.9%", Utils.getFormattedProbability(0.3785f));
+        assertEquals("60.0%", Utils.getFormattedProbability(0.6f));
+        assertEquals("100.0%", Utils.getFormattedProbability(1f));
 
     }
 }

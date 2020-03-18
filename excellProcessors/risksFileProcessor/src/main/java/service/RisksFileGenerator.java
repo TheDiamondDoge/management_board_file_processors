@@ -11,6 +11,7 @@ import java.io.*;
 import java.util.Date;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 
 public class RisksFileGenerator {
     private static final int FIRST_ROW_INDEX = 5;
@@ -46,26 +47,26 @@ public class RisksFileGenerator {
                 Risk risk = risks.get(i - FIRST_ROW_INDEX);
                 row = sheet.getRow(i);
 
-                this.createCell(0, CellType.NUMERIC).setCellValue(risk.getImpact());
-                this.createCell(1).setCellValue(Utils.getFormattedProbability(risk.getProbability()));
-                this.createCell(2, CellType.NUMERIC).setCellValue(Utils.getFormattedRating(risk.getRating()));
-                this.createCell(3, CellType.NUMERIC).setCellValue(risk.getPrevious());
-                this.createCell(4, CellType.NUMERIC).setCellValue(risk.getInitial());
-                this.createCell(5, CellType.STRING).setCellValue(risk.getRiskDisplayId());
-                this.createCell(6, CellType.STRING).setCellValue(risk.getRiskDescription());
-                this.createCell(7, CellType.STRING).setCellValue(risk.getImpactDescription());
-                this.createCell(8, CellType.STRING).setCellValue(risk.getBusinessImpact());
-                this.createCell(9, CellType.STRING).setCellValue(risk.getRiskResponse());
-                this.createCell(10, CellType.STRING).setCellValue(risk.getMitigation());
-                this.createDateCell(11).setCellValue(risk.getDecisionDate());
-                this.createCell(12, CellType.STRING).setCellValue(risk.getEstimatedCost());
-                this.createCell(13, CellType.STRING).setCellValue(risk.getProvisionBudget());
-                this.createCell(14, CellType.STRING).setCellValue(risk.getResponsible());
-                this.createDateCell(15).setCellValue(risk.getTarget());
-                this.createDateCell(16).setCellValue(risk.getDone());
-                this.createDateCell(17).setCellValue(risk.getResult());
-                this.createCell(18).setCellValue(projectName);
-                this.createDateCell(19).setCellValue(new Date());
+                Utils.setCellValue(this.createCell(0, CellType.NUMERIC), risk.getImpact());
+                Utils.setCellValue(this.createCell(1), Utils.getFormattedProbability(risk.getProbability()));
+                Utils.setCellValue(this.createCell(2, CellType.NUMERIC), Utils.getFormattedRating(risk.getRating()));
+                Utils.setCellValue(this.createCell(3, CellType.NUMERIC), risk.getPrevious());
+                Utils.setCellValue(this.createCell(4, CellType.NUMERIC), risk.getInitial());
+                Utils.setCellValue(this.createCell(5, CellType.STRING), risk.getRiskDisplayId());
+                Utils.setCellValue(this.createCell(6, CellType.STRING), risk.getRiskDescription());
+                Utils.setCellValue(this.createCell(7, CellType.STRING), risk.getImpactDescription());
+                Utils.setCellValue(this.createCell(8, CellType.STRING), risk.getBusinessImpact());
+                Utils.setCellValue(this.createCell(9, CellType.STRING), risk.getRiskResponse());
+                Utils.setCellValue(this.createCell(10, CellType.STRING), risk.getMitigation());
+                Utils.setCellValue(this.createDateCell(11), risk.getDecisionDate());
+                Utils.setCellValue(this.createCell(12, CellType.STRING), risk.getEstimatedCost());
+                Utils.setCellValue(this.createCell(13, CellType.STRING), risk.getProvisionBudget());
+                Utils.setCellValue(this.createCell(14, CellType.STRING), risk.getResponsible());
+                Utils.setCellValue(this.createDateCell(15), risk.getTarget());
+                Utils.setCellValue(this.createDateCell(16), risk.getDone());
+                Utils.setCellValue(this.createDateCell(17), risk.getResult());
+                Utils.setCellValue(this.createCell(18), projectName);
+                Utils.setCellValue(this.createDateCell(19), new Date());
             }
 
 
@@ -104,6 +105,10 @@ public class RisksFileGenerator {
         cell.setCellStyle(cellStyle);
 
         return cell;
+    }
+
+    private Object nullToEmptyStr(Object value) {
+        return Objects.isNull(value) ? "" : value;
     }
 
     private XSSFCellStyle getBaseCellStyle() {
