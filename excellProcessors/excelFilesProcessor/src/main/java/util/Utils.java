@@ -1,9 +1,9 @@
 package util;
 
 import exceptions.TooLongStringException;
-import exceptions.WrongDateFormat;
+import exceptions.WrongDateFormatException;
 import exceptions.WrongImpactValueException;
-import exceptions.WrongNumberFormat;
+import exceptions.WrongNumberFormatException;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellType;
@@ -59,19 +59,19 @@ public class Utils {
         }
     }
 
-    public static double getNumber(Cell cell) throws WrongNumberFormat {
+    public static double getNumber(Cell cell) throws WrongNumberFormatException {
         try {
             return cell.getNumericCellValue();
         } catch (Exception e) {
-            throw new WrongNumberFormat();
+            throw new WrongNumberFormatException();
         }
     }
 
-    public static Date getDate(Cell cell) throws WrongDateFormat {
+    public static Date getDate(Cell cell) throws WrongDateFormatException {
         try {
             return cell.getDateCellValue();
         } catch (Exception e) {
-            throw new WrongDateFormat();
+            throw new WrongDateFormatException();
         }
     }
 

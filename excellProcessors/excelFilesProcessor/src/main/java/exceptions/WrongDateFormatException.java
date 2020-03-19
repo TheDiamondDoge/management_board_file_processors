@@ -1,13 +1,13 @@
 package exceptions;
 
-public class WrongDateFormat extends Exception {
+public class WrongDateFormatException extends Exception {
     public static final String DEFAULT_MESSAGE = "Wrong date format";
 
-    public WrongDateFormat() {
+    public WrongDateFormatException() {
         super(DEFAULT_MESSAGE);
     }
 
-    public WrongDateFormat(String message) {
+    public WrongDateFormatException(String message) {
         super(message);
     }
 }

@@ -4,7 +4,7 @@ import data.Error;
 import data.Risk;
 import data.RisksDTO;
 import exceptions.NoSheetFoundException;
-import exceptions.WrongFileFormat;
+import exceptions.WrongFileFormatException;
 import org.junit.Test;
 import util.Utils;
 
@@ -18,8 +18,8 @@ import static org.junit.Assert.*;
 public class RisksExtractorTest {
 
     @Test
-    public void xlsFileExtractionWorks() throws WrongFileFormat, IOException, NoSheetFoundException {
-        RisksExtractor extractor = new RisksExtractor("src/test/resources/risks.xls");
+    public void xlsFileExtractionWorks() throws WrongFileFormatException, IOException, NoSheetFoundException {
+        RisksExtractor extractor = new RisksExtractor("src/test/resources/risks/risks.xls");
         RisksDTO data = extractor.extract();
         int expectedAmountOfRisksFromFile = 6;
 
@@ -30,8 +30,8 @@ public class RisksExtractorTest {
     }
 
     @Test
-    public void xlsxFileExtractionWorks() throws WrongFileFormat, IOException, NoSheetFoundException {
-        RisksExtractor extractor = new RisksExtractor("src/test/resources/risks.xlsx");
+    public void xlsxFileExtractionWorks() throws WrongFileFormatException, IOException, NoSheetFoundException {
+        RisksExtractor extractor = new RisksExtractor("src/test/resources/risks/risks.xlsx");
         RisksDTO data = extractor.extract();
         int expectedAmountOfRisksFromFile = 6;
 
@@ -41,21 +41,21 @@ public class RisksExtractorTest {
         );
     }
 
-    @Test(expected = WrongFileFormat.class)
-    public void unsupportedFormatFileExtraction_shouldFail() throws WrongFileFormat, IOException, NoSheetFoundException {
-        RisksExtractor extractor = new RisksExtractor("src/test/resources/risks.pdf");
+    @Test(expected = WrongFileFormatException.class)
+    public void unsupportedFormatFileExtraction_shouldFail() throws WrongFileFormatException, IOException, NoSheetFoundException {
+        RisksExtractor extractor = new RisksExtractor("src/test/resources/risks/risks.pdf");
         extractor.extract();
     }
 
     @Test(expected = NoSheetFoundException.class)
-    public void xlsxFileDoesntHaveSheet_Risks() throws WrongFileFormat, IOException, NoSheetFoundException {
-        RisksExtractor extractor = new RisksExtractor("src/test/resources/risks_without_Risks_sheet.xlsx");
+    public void xlsxFileDoesntHaveSheet_Risks() throws WrongFileFormatException, IOException, NoSheetFoundException {
+        RisksExtractor extractor = new RisksExtractor("src/test/resources/risks/risks_without_Risks_sheet.xlsx");
         extractor.extract();
     }
 
     @Test
-    public void risksWithWrongImpact_Ignored_errMsgSaved() throws WrongFileFormat, IOException, NoSheetFoundException {
-        RisksExtractor extractor = new RisksExtractor("src/test/resources/risks_with_wrong_impact_rows.xlsx");
+    public void risksWithWrongImpact_Ignored_errMsgSaved() throws WrongFileFormatException, IOException, NoSheetFoundException {
+        RisksExtractor extractor = new RisksExtractor("src/test/resources/risks/risks_with_wrong_impact_rows.xlsx");
         RisksDTO data = extractor.extract();
 
         int expectedRisksAmount = 4;
@@ -68,8 +68,8 @@ public class RisksExtractorTest {
     }
 
     @Test
-    public void risksWithWrongNumberFormats_errDataFlagSet_errMsgSaved() throws WrongFileFormat, IOException, NoSheetFoundException {
-        RisksExtractor extractor = new RisksExtractor("src/test/resources/risks_with_wrong_number_formats.xlsx");
+    public void risksWithWrongNumberFormats_errDataFlagSet_errMsgSaved() throws WrongFileFormatException, IOException, NoSheetFoundException {
+        RisksExtractor extractor = new RisksExtractor("src/test/resources/risks/risks_with_wrong_number_formats.xlsx");
         RisksDTO data = extractor.extract();
         Float errorIndicator = -1f;
 
@@ -103,8 +103,8 @@ public class RisksExtractorTest {
     }
 
     @Test
-    public void risksWithWrongDateFormats_errDataFlagSet_errMsgSaved() throws WrongFileFormat, IOException, NoSheetFoundException {
-        RisksExtractor extractor = new RisksExtractor("src/test/resources/risks_with_wrong_date_formats.xlsx");
+    public void risksWithWrongDateFormats_errDataFlagSet_errMsgSaved() throws WrongFileFormatException, IOException, NoSheetFoundException {
+        RisksExtractor extractor = new RisksExtractor("src/test/resources/risks/risks_with_wrong_date_formats.xlsx");
         RisksDTO data = extractor.extract();
         Date errorFlag = Utils.getErrorDateIndicator();
 
@@ -138,8 +138,8 @@ public class RisksExtractorTest {
     }
 
     @Test
-    public void stringsWithExceededLengthLimit_errDataFlagSet_errMsgSaved() throws WrongFileFormat, IOException, NoSheetFoundException {
-        RisksExtractor extractor = new RisksExtractor("src/test/resources/risks-strings-with-exceeded-limits.xlsx");
+    public void stringsWithExceededLengthLimit_errDataFlagSet_errMsgSaved() throws WrongFileFormatException, IOException, NoSheetFoundException {
+        RisksExtractor extractor = new RisksExtractor("src/test/resources/risks/risks-strings-with-exceeded-limits.xlsx");
         RisksDTO data = extractor.extract();
 
         int expectedRisksAmount = 6;

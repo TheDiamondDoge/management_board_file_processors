@@ -19,14 +19,14 @@ import static org.junit.Assert.*;
 public class UtilsTest {
     @Test
     public void workbookFactoryForXls_returnsHSSFWorkbookTest() throws IOException {
-        String xlsPath = "src/test/resources/risks.xls";
+        String xlsPath = "src/test/resources/risks/risks.xls";
         Workbook workbook = Utils.workbookFactory(xlsPath, new FileInputStream(new File(xlsPath)));
         assertTrue(workbook instanceof HSSFWorkbook);
     }
 
     @Test
     public void workbookFactoryForXlsx_returnsXSSFWorkbookTest() throws IOException {
-        String xlsxPath = "src/test/resources/risks.xlsx";
+        String xlsxPath = "src/test/resources/risks/risks.xlsx";
         Workbook workbook = Utils.workbookFactory(xlsxPath, new FileInputStream(new File(xlsxPath)));
         assertTrue(workbook instanceof XSSFWorkbook);
     }
@@ -63,11 +63,7 @@ public class UtilsTest {
     public void getErrorDateIndicator() throws ParseException {
         SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
         Date dateToCheck;
-        try {
-            dateToCheck = format.parse("1970-01-01");
-        } catch (ParseException e) {
-            throw e;
-        }
+        dateToCheck = format.parse("1970-01-01");
 
         Date errorDate = Utils.getErrorDateIndicator();
         assertEquals("As an error indicator 1970-01-01 is used. Should be equals",

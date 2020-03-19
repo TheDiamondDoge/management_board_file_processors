@@ -1,9 +1,9 @@
 package exceptions;
 
-public class WrongFileFormat extends Exception {
+public class WrongFileFormatException extends Exception {
     public static final String DEFAULT_MESSAGE = "Wrong file format";
 
-    public WrongFileFormat() {
+    public WrongFileFormatException() {
         super(DEFAULT_MESSAGE);
     }
 }

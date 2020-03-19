@@ -2,7 +2,7 @@ package service;
 
 import data.Risk;
 import exceptions.NoSheetFoundException;
-import exceptions.WrongFileFormat;
+import exceptions.WrongFileFormatException;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
@@ -78,7 +78,7 @@ public class RisksFileGeneratorTest {
     }
 
     @Test
-    public void generalXlsxGeneration_testIfWorks() throws WrongFileFormat, IOException, NoSheetFoundException {
+    public void generalXlsxGeneration_testIfWorks() throws WrongFileFormatException, IOException, NoSheetFoundException {
         RisksFileGenerator generator = new RisksFileGenerator("src/test/resources/out/");
         String filepath = generator.generateXlsxFile(risks, "TestProject");
 
@@ -88,7 +88,7 @@ public class RisksFileGeneratorTest {
     }
 
     @Test
-    public void allRisksDataShouldBeAtNecessaryPlace() throws WrongFileFormat, IOException, NoSheetFoundException {
+    public void allRisksDataShouldBeAtNecessaryPlace() throws WrongFileFormatException, IOException, NoSheetFoundException {
         String projectName = "TestProject";
         RisksFileGenerator generator = new RisksFileGenerator("src/test/resources/out/");
         String filepath = generator.generateXlsxFile(risks, projectName);

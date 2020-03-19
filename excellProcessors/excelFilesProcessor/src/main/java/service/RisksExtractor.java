@@ -28,7 +28,7 @@ public class RisksExtractor {
         this.path = path;
     }
 
-    public RisksDTO extract() throws IOException, NoSheetFoundException, WrongFileFormat {
+    public RisksDTO extract() throws IOException, NoSheetFoundException, WrongFileFormatException {
         FileInputStream fis = null;
         try {
             if (Objects.isNull(errors)) errors = new ArrayList<>();
@@ -70,7 +70,7 @@ public class RisksExtractor {
 
 //            file.delete();
         } catch(NotOfficeXmlFileException e) {
-            throw new WrongFileFormat();
+            throw new WrongFileFormatException();
         } finally {
             if (Objects.nonNull(fis)) {
                 fis.close();
@@ -188,7 +188,7 @@ public class RisksExtractor {
                 riskPointer.setImpact(-1);
                 String errMessage = impactEx.getMessage();
                 errors.add(new Error(cellId, cell.getRowIndex(), errMessage));
-            } catch (WrongNumberFormat numberEx) {
+            } catch (WrongNumberFormatException numberEx) {
                 this.setErrorNumberIndicator(riskPointer, cellId);
                 String errMessage = numberEx.getMessage();
                 errors.add(new Error(cellId, cell.getRowIndex(), errMessage));
@@ -196,7 +196,7 @@ public class RisksExtractor {
                 String errMessage = lengthEx.getMessage();
                 this.setErrorStringIndicator(riskPointer, cellId);
                 errors.add(new Error(cellId, cell.getRowIndex(), errMessage));
-            } catch (WrongDateFormat dateEx) {
+            } catch (WrongDateFormatException dateEx) {
                 this.setErrorDateIndicator(riskPointer, cellId);
                 String errMessage = dateEx.getMessage();
                 errors.add(new Error(cellId, cell.getRowIndex(), errMessage));

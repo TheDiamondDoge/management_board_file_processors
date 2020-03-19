@@ -1,13 +1,13 @@
 package exceptions;
 
-public class WrongNumberFormat extends Exception {
+public class WrongNumberFormatException extends Exception {
     public static final String DEFAULT_MESSAGE = "Wrong number format";
 
-    public WrongNumberFormat() {
+    public WrongNumberFormatException() {
         super(DEFAULT_MESSAGE);
     }
 
-    public WrongNumberFormat(String message) {
+    public WrongNumberFormatException(String message) {
         super(message);
     }
 }
