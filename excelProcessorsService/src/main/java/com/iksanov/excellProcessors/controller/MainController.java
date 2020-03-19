@@ -1,10 +1,12 @@
 package com.iksanov.excellProcessors.controller;
 
 import com.iksanov.excellProcessors.service.MainService;
+import data.CostDTO;
 import data.Risk;
 import data.RisksDTO;
 import exceptions.NoSheetFoundException;
-import exceptions.WrongFileFormat;
+import exceptions.WrongBDValueException;
+import exceptions.WrongFileFormatException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,6 +15,7 @@ import org.springframework.core.io.ByteArrayResource;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import service.RisksFileGenerator;
+
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -35,17 +38,22 @@ public class MainController {
     }
 
     @PostMapping("/risks")
-    public RisksDTO extractRisksFromFile(MultipartFile file) throws WrongFileFormat, IOException, NoSheetFoundException {
+    public RisksDTO extractRisksFromFile(MultipartFile file) throws WrongFileFormatException, IOException, NoSheetFoundException {
         LOGGER.info("POST /processors/risks Filename: {}", file.getOriginalFilename());
         return this.mainService.processRisksFile(file);
     }
 
     @PostMapping("/risksFile/{projectName}")
-    public ByteArrayResource getRisksFile(@RequestBody List<Risk> risks, @PathVariable String projectName) throws WrongFileFormat, IOException, NoSheetFoundException {
+    public ByteArrayResource getRisksFile(@RequestBody List<Risk> risks, @PathVariable String projectName) throws IOException, NoSheetFoundException {
         LOGGER.info("GET /processors/risksFile/{}", projectName);
-
         RisksFileGenerator generator = new RisksFileGenerator(filepathDirectory);
         String filepath = generator.generateXlsxFile(risks, projectName);
         return new ByteArrayResource(Files.readAllBytes(Paths.get(filepath)));
+    }
+
+    @PostMapping("/cost/{bd}")
+    public CostDTO extractCostFromFile(MultipartFile file, @PathVariable String bd) throws NoSheetFoundException, IOException, WrongBDValueException {
+        LOGGER.info("POST /processors/cost/{} Filename: {}", bd, file.getOriginalFilename());
+        return this.mainService.processCostFile(file, bd);
     }
 }
