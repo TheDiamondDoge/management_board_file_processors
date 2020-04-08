@@ -14,20 +14,23 @@ public class HtmlExtractor {
     private Document doc;
     private PptCreator pptCreator;
 
-    public HtmlExtractor(String filepath) throws IOException {
-        File input = new File(filepath);
-        this.doc = Jsoup.parse(input, "UTF-8");
-
-        pptCreator = new PptCreator();
+    public HtmlExtractor(PptCreator pptCreator) {
+        this.pptCreator = pptCreator;
     }
 
-    public void extract() throws IOException {
+    public void extract(File file) throws IOException {
+        this.doc = Jsoup.parse(file, "UTF-8");
+        processNodes(doc.body());
+    }
+
+    public void extract(String html) throws IOException {
+        this.doc = Jsoup.parse(html);
         processNodes(doc.body());
     }
 
     private void processNodes(Element e) throws IOException {
+        pptCreator.addNextSlide();
         writeNodeToPpt(e);
-        pptCreator.save();
     }
 
     private void writeNodeToPpt(Element e) {

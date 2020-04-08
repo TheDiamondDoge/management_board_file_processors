@@ -35,24 +35,26 @@ public class PptCreator {
     public PptCreator() {
         this.ppt = new XMLSlideShow();
         this.slideMaster = ppt.getSlideMasters().get(0);
-        addSlideWithParagraph();
-//        this.currentBody = currentSlide.getPlaceholder(1);
     }
 
-    private void addSlideWithParagraph() {
-        addEmptySlide();
-        currentBody = currentSlide.getPlaceholder(1);
-        rowsInCurrentSlide -= MAX_ROW_IN_SLIDE;
+    public void addNextSlide() {
+        initDefaultSlide();
+        if (rowsInCurrentSlide > MAX_ROW_IN_SLIDE) {
+            rowsInCurrentSlide -= MAX_ROW_IN_SLIDE;
+        } else {
+            rowsInCurrentSlide = 0;
+            currentRowWidth = 0;
+        }
     }
 
-    private void addEmptySlide() {
+    public void initDefaultSlide() {
         XSLFSlideLayout layout = slideMaster.getLayout(SlideLayout.TITLE_AND_CONTENT);
         currentSlide = ppt.createSlide(layout);
 
         XSLFTextShape header = currentSlide.getPlaceholder(0);
-        XSLFTextShape body = currentSlide.getPlaceholder(1);
+        currentBody = currentSlide.getPlaceholder(1);
 
-        body.clearText();
+        currentBody.clearText();
     }
 
     public void createNewParagraph(boolean bullets) {
@@ -77,8 +79,7 @@ public class PptCreator {
 
         increaseCharsAmount(textNode.text());
         if (isOverflowIfExists()) {
-            addSlideWithParagraph();
-//            rowsInCurrentSlide -= MAX_ROW_IN_SLIDE;
+            addNextSlide();
         }
 
         textRun.setText(textNode.text());
@@ -110,7 +111,6 @@ public class PptCreator {
         AffineTransform affineTransform = new AffineTransform();
         FontRenderContext frc = new FontRenderContext(affineTransform, true, true);
         Font font = new Font(FONT_NAME, Font.PLAIN, FONT_SIZE);
-//        System.out.println(font.getStringBounds(text, frc).getWidth());
 
         currentRowWidth += (int) font.getStringBounds(text, frc).getWidth();
         if (currentRowWidth >= MAX_ROW_WIDTH) {
