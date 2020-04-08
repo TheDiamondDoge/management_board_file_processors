@@ -25,4 +25,8 @@ hs_err_pid*
 
 #others
 .idea
-*/target
+
+target/
+META-INF/
+out/
+tmp/

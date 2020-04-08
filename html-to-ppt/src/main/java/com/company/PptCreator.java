@@ -12,6 +12,7 @@ import java.awt.geom.AffineTransform;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.util.Objects;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -27,6 +28,7 @@ public class PptCreator {
     private XSLFSlide currentSlide;
     private XSLFTextShape currentBody;
     private XSLFTextParagraph currentParagraph;
+    private XSLFTextRun currentTextRun;
 
     private boolean NUMERIC_BULLETS = false;
     private int rowsInCurrentSlide = 0;
@@ -75,14 +77,14 @@ public class PptCreator {
     public void addNodeToSlide(Node node, Element element) {
         setParagraphParams(element);
         TextNode textNode = (TextNode) node;
-        XSLFTextRun textRun = getTextRun(element);
+//        XSLFTextRun textRun = getTextRun(element);
 
         increaseCharsAmount(textNode.text());
         if (isOverflowIfExists()) {
             addNextSlide();
         }
 
-        textRun.setText(textNode.text());
+        currentTextRun.setText(textNode.text());
     }
 
     private void setParagraphParams(Element element) {
@@ -93,18 +95,15 @@ public class PptCreator {
         }
     }
 
-    private XSLFTextRun getTextRun(Element e) {
-        XSLFTextRun textRun = getDefaultTextRun();
+    public void decorateTextRun(Element e) {
         String tag = e.tagName();
         String style = e.attr("style");
         String[] styleAttrs = style.split(";");
 
-        addDecorationByTag(textRun, tag);
+        addDecorationByTag(currentTextRun, tag);
         for (String attr : styleAttrs) {
-            addDecorationByStyle(textRun, attr);
+            addDecorationByStyle(currentTextRun, attr);
         }
-
-        return textRun;
     }
 
     private void increaseCharsAmount(String text) {
@@ -131,11 +130,15 @@ public class PptCreator {
         out.close();
     }
 
-    private XSLFTextRun getDefaultTextRun() {
-        XSLFTextRun textRun = currentParagraph.addNewTextRun();
-        textRun.setFontFamily(FONT_NAME);
-        textRun.setFontSize((double) FONT_SIZE);
-        return textRun;
+    public XSLFTextRun createDefaultTextRun() {
+        if (Objects.isNull(currentParagraph)) {
+            createParagraph();
+        }
+        currentTextRun = currentParagraph.addNewTextRun();
+        currentTextRun.setFontFamily(FONT_NAME);
+        currentTextRun.setFontSize((double) FONT_SIZE);
+
+        return currentTextRun;
     }
 
     private void addDecorationByStyle(XSLFTextRun run, String styleAttr) {
