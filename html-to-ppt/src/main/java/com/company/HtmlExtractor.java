@@ -1,6 +1,5 @@
 package com.company;
 
-import org.apache.poi.xslf.usermodel.XSLFTextRun;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
@@ -14,24 +13,24 @@ import java.util.Stack;
 
 public class HtmlExtractor {
     private Document doc;
-    private PptCreator pptCreator;
+    private NewPptCreator pptCreator;
     private Stack<Element> elements;
 
-    public HtmlExtractor(PptCreator pptCreator) {
+    public HtmlExtractor(NewPptCreator pptCreator) {
         this.pptCreator = pptCreator;
     }
 
     public void extract(File file) throws IOException {
-        this.doc = Jsoup.parse(file, "UTF-8");
+        this.doc = Jsoup.parse(file, "windows-1251");
         processNodes(doc.body());
     }
 
-    public void extract(String html) throws IOException {
+    public void extract(String html) {
         this.doc = Jsoup.parse(html);
         processNodes(doc.body());
     }
 
-    private void processNodes(Element e) throws IOException {
+    private void processNodes(Element e) {
         elements = new Stack<>();
         pptCreator.addNextSlide();
         writeNodeToPpt(e, false);
@@ -50,9 +49,7 @@ public class HtmlExtractor {
         for (Node node : childNodes) {
             if (isTextNode(node)) {
                 pptCreator.createDefaultTextRun();
-                elements.forEach(elem -> {
-                    pptCreator.decorateTextRun(elem);
-                });
+                elements.forEach(elem -> pptCreator.decorateTextRun(elem));
                 pptCreator.addNodeToSlide(node, e);
             } else if (isElementNode(node)){
                 Element elementNode = (Element) node;

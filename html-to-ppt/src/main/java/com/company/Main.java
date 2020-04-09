@@ -11,12 +11,14 @@ public class Main {
         String path = "C:\\Users\\TheDiamondDoge\\IdeaProjects\\management_board_file_processors\\html-to-ppt\\src\\main\\resources\\file.html";
         File file = new File(path);
 
-        PptCreator ppt = new PptCreator();
+        NewPptCreator ppt = new NewPptCreator();
+//        ppt.initDefaultSlide();
         HtmlExtractor htmlExtractor = new HtmlExtractor(ppt);
         htmlExtractor.extract(file);
-        htmlExtractor.extract(file);
-        htmlExtractor.extract(html1);
-        htmlExtractor.extract(html);
-        ppt.save();
+//        htmlExtractor.extract(file);
+//        htmlExtractor.extract(html1);
+//        htmlExtractor.extract(html);
+//        ppt.createHeader();
+        ppt.save("TextFormat.pptx");
     }
 }

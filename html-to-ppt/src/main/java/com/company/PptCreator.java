@@ -16,10 +16,14 @@ import java.util.Objects;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+//1280x720
 public class PptCreator {
-    private final int MAX_ROW_WIDTH = 626;
+    private final int MAX_SLIDE_HEIGHT = 720;
+    private final int MAX_SLIDE_WIDTH = 1280;
+    private final int MAX_ROW_WIDTH = 1200;
     private final int MAX_ROW_IN_SLIDE = 18;
     private final int FONT_SIZE = 14;
+    private final int SLIDE_PADDING = 20;
     private final String FONT_NAME = "Calibri";
     private final String SAVE_PATH = "TextFormat.pptx";
 
@@ -33,10 +37,20 @@ public class PptCreator {
     private boolean NUMERIC_BULLETS = false;
     private int rowsInCurrentSlide = 0;
     private int currentRowWidth = 0;
+    private int currentlyOccupiedSlideHeight = 0;
+    private int averageRowHeight = calculateRowWidth();
 
     public PptCreator() {
         this.ppt = new XMLSlideShow();
         this.slideMaster = ppt.getSlideMasters().get(0);
+    }
+
+    private int calculateRowWidth() {
+        String text = "Text sample";
+        AffineTransform affineTransform = new AffineTransform();
+        FontRenderContext frc = new FontRenderContext(affineTransform, true, true);
+        Font font = new Font(FONT_NAME, Font.PLAIN, FONT_SIZE);
+        return (int) font.getStringBounds(text, frc).getHeight();
     }
 
     public void addNextSlide() {
@@ -50,13 +64,23 @@ public class PptCreator {
     }
 
     public void initDefaultSlide() {
-        XSLFSlideLayout layout = slideMaster.getLayout(SlideLayout.TITLE_AND_CONTENT);
+        Dimension dimension = new Dimension();
+        dimension.setSize(MAX_SLIDE_WIDTH, MAX_SLIDE_HEIGHT);
+        ppt.setPageSize(dimension);
+
+        XSLFSlideLayout layout = slideMaster.getLayout(SlideLayout.BLANK);
         currentSlide = ppt.createSlide(layout);
 
-        XSLFTextShape header = currentSlide.getPlaceholder(0);
-        currentBody = currentSlide.getPlaceholder(1);
+//        currentBody = currentSlide.getPlaceholder(1);
+        currentBody = createWorkingTextBody();
+        currentBody.setText("");
+    }
 
-        currentBody.clearText();
+    private XSLFTextBox createWorkingTextBody() {
+        XSLFTextBox workingArea = currentSlide.createTextBox();
+        int areaHeight = MAX_SLIDE_HEIGHT - currentlyOccupiedSlideHeight - SLIDE_PADDING;
+        workingArea.setAnchor(new Rectangle(SLIDE_PADDING, currentlyOccupiedSlideHeight + SLIDE_PADDING, MAX_ROW_WIDTH - SLIDE_PADDING, areaHeight));
+        return workingArea;
     }
 
     public void createNewParagraph(boolean bullets) {
@@ -77,7 +101,6 @@ public class PptCreator {
     public void addNodeToSlide(Node node, Element element) {
         setParagraphParams(element);
         TextNode textNode = (TextNode) node;
-//        XSLFTextRun textRun = getTextRun(element);
 
         increaseCharsAmount(textNode.text());
         if (isOverflowIfExists()) {
@@ -112,6 +135,7 @@ public class PptCreator {
         Font font = new Font(FONT_NAME, Font.PLAIN, FONT_SIZE);
 
         currentRowWidth += (int) font.getStringBounds(text, frc).getWidth();
+        System.out.println((int) font.getStringBounds(text, frc).getHeight());
         if (currentRowWidth >= MAX_ROW_WIDTH) {
             int fullRows = currentRowWidth / MAX_ROW_WIDTH;
             rowsInCurrentSlide += fullRows;
@@ -130,15 +154,19 @@ public class PptCreator {
         out.close();
     }
 
-    public XSLFTextRun createDefaultTextRun() {
+    public void createDefaultTextRun() {
         if (Objects.isNull(currentParagraph)) {
             createParagraph();
         }
-        currentTextRun = currentParagraph.addNewTextRun();
+        currentTextRun = createCurrentTextRun();
         currentTextRun.setFontFamily(FONT_NAME);
         currentTextRun.setFontSize((double) FONT_SIZE);
+    }
 
-        return currentTextRun;
+    private XSLFTextRun createCurrentTextRun() {
+        XSLFTextRun textRun = currentParagraph.addNewTextRun();
+        textRun.setText("");
+        return textRun;
     }
 
     private void addDecorationByStyle(XSLFTextRun run, String styleAttr) {
@@ -181,5 +209,48 @@ public class PptCreator {
                 run.setStrikethrough(true);
                 break;
         }
+    }
+
+    public void createHeader() {
+        XSLFTextBox textBox = currentSlide.createTextBox();
+        textBox.setAnchor(new Rectangle(0, 0, 200, 75));
+
+        XSLFTextParagraph paragraph = textBox.addNewTextParagraph();
+        XSLFTextRun textRun = paragraph.addNewTextRun();
+        textRun.setFontSize(12.);
+        textRun.setFontFamily(FONT_NAME);
+        textRun.setBold(true);
+        textRun.setText("Project name: ");
+
+        textRun = paragraph.addNewTextRun();
+        textRun.setFontSize(12.);
+        textRun.setFontFamily(FONT_NAME);
+        textRun.setText("Project Pineapple");
+
+        paragraph.addLineBreak();
+
+        textRun = paragraph.addNewTextRun();
+        textRun.setFontSize(12.);
+        textRun.setFontFamily(FONT_NAME);
+        textRun.setBold(true);
+        textRun.setText("Project manager: ");
+
+        textRun = paragraph.addNewTextRun();
+        textRun.setFontSize(12.);
+        textRun.setFontFamily(FONT_NAME);
+        textRun.setText("IKSANOV Aleksandr");
+
+        paragraph.addLineBreak();
+
+        textRun = paragraph.addNewTextRun();
+        textRun.setFontSize(12.);
+        textRun.setFontFamily(FONT_NAME);
+        textRun.setBold(true);
+        textRun.setText("Last Updated: ");
+
+        textRun = paragraph.addNewTextRun();
+        textRun.setFontSize(12.);
+        textRun.setFontFamily(FONT_NAME);
+        textRun.setText("2020-04-08");
     }
 }
