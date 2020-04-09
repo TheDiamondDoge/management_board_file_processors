@@ -1,6 +1,9 @@
 package com.company;
 
 import org.apache.poi.sl.usermodel.AutoNumberingScheme;
+import org.apache.poi.sl.usermodel.StrokeStyle;
+import org.apache.poi.sl.usermodel.TableCell;
+import org.apache.poi.sl.usermodel.TextParagraph;
 import org.apache.poi.xslf.usermodel.*;
 import org.jsoup.nodes.Element;
 import org.jsoup.nodes.Node;
@@ -69,8 +72,8 @@ public class NewPptCreator {
     public void addTextWorkingArea() {
         XSLFTextBox workingArea = currentSlide.createTextBox();
         int width = SLIDE_WIDTH - SLIDE_PADDING * 2;
-        int height = SLIDE_HEIGHT - SLIDE_PADDING * 2;
-        workingArea.setAnchor(new Rectangle(SLIDE_PADDING, LAST_ELEMENT_Y_END, width, height));
+        int height = SLIDE_HEIGHT - SLIDE_PADDING * 3;
+        workingArea.setAnchor(new Rectangle(SLIDE_PADDING, currentHeightOccupied + SLIDE_PADDING, width, height));
         currentBody = workingArea;
     }
 
@@ -81,6 +84,7 @@ public class NewPptCreator {
     public void createNewParagraph(boolean bulletsNeeded, Element element) {
         if (Objects.isNull(currentBody)) {
             addTextWorkingArea();
+            currentParagraph = currentBody.getTextParagraphs().get(0);
         }
         currentParagraph = currentBody.addNewTextParagraph();
         currentParagraph.setBullet(bulletsNeeded);
@@ -187,14 +191,91 @@ public class NewPptCreator {
     }
 
     public void addNextSlide() {
-        createNewSlide();
-        addTextWorkingArea();
         if (currentHeightOccupied > SLIDE_HEIGHT) {
             currentHeightOccupied -= SLIDE_HEIGHT;
         } else {
             currentHeightOccupied = 0;
             currentRowWidth = 0;
         }
+        createNewSlide();
+        addTextWorkingArea();
+    }
+
+    public void createHeader() {
+        currentBody = currentSlide.createTextBox();
+        currentBody.setAnchor(new Rectangle(0 + SLIDE_PADDING, 0 + SLIDE_PADDING, 500, 75));
+
+        currentParagraph = currentBody.getTextParagraphs().get(0);
+        createDefaultTextRun();
+        currentTextRun.setBold(true);
+        currentTextRun.setText("Project name: ");
+
+        createDefaultTextRun();
+        currentTextRun.setText("Project Pineapple");
+
+        currentParagraph.addLineBreak();
+
+        createDefaultTextRun();
+        currentTextRun.setBold(true);
+        currentTextRun.setText("Project manager: ");
+
+        createDefaultTextRun();
+        currentTextRun.setText("IKSANOV Aleksandr");
+
+        currentParagraph.addLineBreak();
+
+        createDefaultTextRun();
+        currentTextRun.setBold(true);
+        currentTextRun.setText("Last Updated: ");
+
+        createDefaultTextRun();
+        currentTextRun.setText("2020-04-08");
+
+
+        currentHeightOccupied += estimatedRowHeight * 3;
+    }
+
+    public void createIndicatorsTable() {
+        XSLFTable table = currentSlide.createTable(2, 4);
+        table.setAnchor(new Rectangle(SLIDE_WIDTH - SLIDE_PADDING - 400, 0 + SLIDE_PADDING, 350, 75));
+
+        String[] labels = {"Schedule", "Scope", "Quality", "Cost"};
+        for (int i = 0; i < labels.length; i++) {
+            XSLFTableCell headerCell = table.getCell(0, i);
+            decorateThForIndicators(headerCell, labels[i]);
+
+            XSLFTableCell valueCell = table.getCell(1, i);
+            decorateTdForIndicators(valueCell);
+        }
+    }
+
+    private void decorateThForIndicators(XSLFTableCell cell, String value) {
+        XSLFTextParagraph paragraph = cell.addNewTextParagraph();
+        XSLFTextRun textRun = paragraph.addNewTextRun();
+        paragraph.setTextAlign(TextParagraph.TextAlign.CENTER);
+        textRun.setText(value);
+        blackBorderedTableCellDecorator(cell);
+    }
+
+    private void decorateTdForIndicators(XSLFTableCell cell) {
+        XSLFTextParagraph paragraph = cell.addNewTextParagraph();
+        XSLFTextRun textRun = paragraph.addNewTextRun();
+        paragraph.setTextAlign(TextParagraph.TextAlign.CENTER);
+        textRun.setText("GREEN");
+        cell.setFillColor(new Color(0, 255, 0));
+        blackBorderedTableCellDecorator(cell);
+    }
+
+    private void blackBorderedTableCellDecorator(XSLFTableCell cell) {
+        cell.setBorderDash(TableCell.BorderEdge.bottom, StrokeStyle.LineDash.SOLID);
+        cell.setBorderDash(TableCell.BorderEdge.top, StrokeStyle.LineDash.SOLID);
+        cell.setBorderDash(TableCell.BorderEdge.left, StrokeStyle.LineDash.SOLID);
+        cell.setBorderDash(TableCell.BorderEdge.right, StrokeStyle.LineDash.SOLID);
+
+        cell.setBorderColor(TableCell.BorderEdge.bottom, Color.black);
+        cell.setBorderColor(TableCell.BorderEdge.top, Color.black);
+        cell.setBorderColor(TableCell.BorderEdge.left, Color.black);
+        cell.setBorderColor(TableCell.BorderEdge.right, Color.black);
     }
 
     public void save(String filepath) throws IOException {

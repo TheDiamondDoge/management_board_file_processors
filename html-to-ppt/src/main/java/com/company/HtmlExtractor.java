@@ -32,7 +32,6 @@ public class HtmlExtractor {
 
     private void processNodes(Element e) {
         elements = new Stack<>();
-        pptCreator.addNextSlide();
         writeNodeToPpt(e, false);
     }
 

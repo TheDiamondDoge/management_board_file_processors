@@ -12,6 +12,10 @@ public class Main {
         File file = new File(path);
 
         NewPptCreator ppt = new NewPptCreator();
+        ppt.createNewSlide();
+        ppt.createHeader();
+        ppt.addTextWorkingArea();
+        ppt.createIndicatorsTable();
 //        ppt.initDefaultSlide();
         HtmlExtractor htmlExtractor = new HtmlExtractor(ppt);
         htmlExtractor.extract(file);
