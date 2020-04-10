@@ -14,8 +14,10 @@ public class Main {
         NewPptCreator ppt = new NewPptCreator();
         ppt.createNewSlide();
         ppt.createHeader();
-        ppt.addTextWorkingArea();
+        ppt.addRowsToOccupiedHeight(6);
         ppt.createIndicatorsTable();
+        ppt.createFooter();
+        ppt.addTextWorkingArea();
 //        ppt.initDefaultSlide();
         HtmlExtractor htmlExtractor = new HtmlExtractor(ppt);
         htmlExtractor.extract(file);

@@ -1,9 +1,6 @@
 package com.company;
 
-import org.apache.poi.sl.usermodel.AutoNumberingScheme;
-import org.apache.poi.sl.usermodel.StrokeStyle;
-import org.apache.poi.sl.usermodel.TableCell;
-import org.apache.poi.sl.usermodel.TextParagraph;
+import org.apache.poi.sl.usermodel.*;
 import org.apache.poi.xslf.usermodel.*;
 import org.jsoup.nodes.Element;
 import org.jsoup.nodes.Node;
@@ -37,6 +34,7 @@ public class NewPptCreator {
 
     private int currentRowWidth = 0;
     private int currentHeightOccupied = 0;
+    private int footerSize = 0;
     private int maxRowWidth = SLIDE_WIDTH - SLIDE_PADDING * 2;
     private int estimatedRowHeight;
 
@@ -72,7 +70,7 @@ public class NewPptCreator {
     public void addTextWorkingArea() {
         XSLFTextBox workingArea = currentSlide.createTextBox();
         int width = SLIDE_WIDTH - SLIDE_PADDING * 2;
-        int height = SLIDE_HEIGHT - SLIDE_PADDING * 3;
+        int height = SLIDE_HEIGHT - currentHeightOccupied - footerSize - SLIDE_PADDING * 3;
         workingArea.setAnchor(new Rectangle(SLIDE_PADDING, currentHeightOccupied + SLIDE_PADDING, width, height));
         currentBody = workingArea;
     }
@@ -162,13 +160,18 @@ public class NewPptCreator {
         return Color.BLACK;
     }
 
-    public void addNodeToSlide(Node node, Element element) {
+    public void prepareDocForText(Node node) {
         TextNode textNode = (TextNode) node;
         increaseCharsAmount(textNode.text());
         if (isOverflowIfExists()) {
             addNextSlide();
         }
 
+        createDefaultTextRun();
+    }
+
+    public void addNodeToSlide(Node node) {
+        TextNode textNode = (TextNode) node;
         currentTextRun.setText(textNode.text());
     }
 
@@ -187,7 +190,7 @@ public class NewPptCreator {
     }
 
     private boolean isOverflowIfExists() {
-        return currentHeightOccupied > SLIDE_HEIGHT;
+        return currentHeightOccupied > SLIDE_HEIGHT - footerSize;
     }
 
     public void addNextSlide() {
@@ -199,11 +202,12 @@ public class NewPptCreator {
         }
         createNewSlide();
         addTextWorkingArea();
+        currentParagraph = currentBody.getTextParagraphs().get(0);
     }
 
     public void createHeader() {
         currentBody = currentSlide.createTextBox();
-        currentBody.setAnchor(new Rectangle(0 + SLIDE_PADDING, 0 + SLIDE_PADDING, 500, 75));
+        currentBody.setAnchor(new Rectangle(SLIDE_PADDING, SLIDE_PADDING, 500, 75));
 
         currentParagraph = currentBody.getTextParagraphs().get(0);
         createDefaultTextRun();
@@ -230,14 +234,15 @@ public class NewPptCreator {
 
         createDefaultTextRun();
         currentTextRun.setText("2020-04-08");
+    }
 
-
-        currentHeightOccupied += estimatedRowHeight * 3;
+    public void addRowsToOccupiedHeight(int rows) {
+        currentHeightOccupied += estimatedRowHeight * rows;
     }
 
     public void createIndicatorsTable() {
         XSLFTable table = currentSlide.createTable(2, 4);
-        table.setAnchor(new Rectangle(SLIDE_WIDTH - SLIDE_PADDING - 400, 0 + SLIDE_PADDING, 350, 75));
+        table.setAnchor(new Rectangle(SLIDE_WIDTH - SLIDE_PADDING - 400, SLIDE_PADDING, 350, 75));
 
         String[] labels = {"Schedule", "Scope", "Quality", "Cost"};
         for (int i = 0; i < labels.length; i++) {
@@ -276,6 +281,45 @@ public class NewPptCreator {
         cell.setBorderColor(TableCell.BorderEdge.top, Color.black);
         cell.setBorderColor(TableCell.BorderEdge.left, Color.black);
         cell.setBorderColor(TableCell.BorderEdge.right, Color.black);
+    }
+
+    public void createFooter() {
+        currentBody = currentSlide.createTextBox();
+        int x = SLIDE_WIDTH / 2 - 175;
+        int y = SLIDE_HEIGHT - 75;
+        currentBody.setAnchor(new Rectangle(x, y, 350, 50));
+        footerSize = 75;
+
+        currentParagraph = currentBody.getTextParagraphs().get(0);
+        currentParagraph.setTextAlign(TextParagraph.TextAlign.CENTER);
+
+        createDefaultTextRun();
+        currentTextRun.setText("Alcatel-Lucent Enterprise - Confidential");
+        currentTextRun.setItalic(true);
+        currentTextRun.setFontSize(12.);
+        currentTextRun.setFontColor(Color.red);
+
+        currentParagraph.addLineBreak();
+
+        createDefaultTextRun();
+        currentTextRun.setText("Solely for authorized persons having a need to know");
+        currentTextRun.setBold(true);
+        currentTextRun.setFontSize(12.);
+
+        currentParagraph.addLineBreak();
+
+        createDefaultTextRun();
+        currentTextRun.setFontSize(12.);
+        currentTextRun.setText("Proprietary - Use pursuant to Company Instruction");
+
+        createFooterLine(y - 10);
+    }
+
+    private void createFooterLine(int y) {
+        XSLFAutoShape line = currentSlide.createAutoShape();
+        line.setShapeType(ShapeType.LINE);
+        line.setAnchor(new Rectangle(SLIDE_PADDING, y, SLIDE_WIDTH - SLIDE_PADDING * 2, 1));
+        line.setLineColor(Color.black);
     }
 
     public void save(String filepath) throws IOException {

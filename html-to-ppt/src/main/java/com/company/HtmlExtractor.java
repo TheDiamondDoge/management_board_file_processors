@@ -47,9 +47,9 @@ public class HtmlExtractor {
 
         for (Node node : childNodes) {
             if (isTextNode(node)) {
-                pptCreator.createDefaultTextRun();
+                pptCreator.prepareDocForText(node);
                 elements.forEach(elem -> pptCreator.decorateTextRun(elem));
-                pptCreator.addNodeToSlide(node, e);
+                pptCreator.addNodeToSlide(node);
             } else if (isElementNode(node)){
                 Element elementNode = (Element) node;
                 elements.push(elementNode);
