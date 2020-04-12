@@ -12,6 +12,7 @@ import java.awt.geom.AffineTransform;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.util.Date;
 import java.util.Objects;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -31,12 +32,15 @@ public class NewPptCreator {
     private XSLFTextShape currentBody;
     private XSLFTextParagraph currentParagraph;
     private XSLFTextRun currentTextRun;
+    private ProjectGeneral projectInfo;
 
+    private String currentSectionName;
     private int currentRowWidth = 0;
     private int currentHeightOccupied = 0;
     private int footerSize = 0;
-    private int maxRowWidth = SLIDE_WIDTH - SLIDE_PADDING * 2;
+    private int maxRowWidth = SLIDE_WIDTH - SLIDE_PADDING * 2 + 350;
     private int estimatedRowHeight;
+    private boolean footerNeeded = true;
 
 
     public NewPptCreator() {
@@ -62,15 +66,21 @@ public class NewPptCreator {
     }
 
     public void createNewSlide() {
-       XSLFSlideMaster slideMaster = ppt.getSlideMasters().get(0);
-       XSLFSlideLayout layout = slideMaster.getLayout(SlideLayout.BLANK);
-       currentSlide = ppt.createSlide(layout);
+        XSLFSlideMaster slideMaster = ppt.getSlideMasters().get(0);
+        XSLFSlideLayout layout = slideMaster.getLayout(SlideLayout.BLANK);
+        currentSlide = ppt.createSlide(layout);
+        currentHeightOccupied += SLIDE_PADDING * 2;
+        createHeader();
+        createSlideName();
+        if (footerNeeded) {
+            createFooter();
+        }
     }
 
     public void addTextWorkingArea() {
         XSLFTextBox workingArea = currentSlide.createTextBox();
         int width = SLIDE_WIDTH - SLIDE_PADDING * 2;
-        int height = SLIDE_HEIGHT - currentHeightOccupied - footerSize - SLIDE_PADDING * 3;
+        int height = SLIDE_HEIGHT - currentHeightOccupied - footerSize;
         workingArea.setAnchor(new Rectangle(SLIDE_PADDING, currentHeightOccupied + SLIDE_PADDING, width, height));
         currentBody = workingArea;
     }
@@ -91,7 +101,8 @@ public class NewPptCreator {
             currentParagraph.setBulletAutoNumber(AutoNumberingScheme.arabicPlain, 1);
         }
 
-        currentHeightOccupied += estimatedRowHeight;
+        currentRowWidth = 0;
+        addRowsToOccupiedHeight(1);
     }
 
     private boolean isNumericBulletsNeeded(Element element) {
@@ -180,11 +191,11 @@ public class NewPptCreator {
         FontRenderContext frc = new FontRenderContext(affineTransform, true, true);
         Font font = new Font(FONT_NAME, Font.PLAIN, FONT_SIZE);
 
-        int textWidth = (int) font.getStringBounds(text, frc).getWidth();
+        int textWidth = (int) Math.ceil(font.getStringBounds(text, frc).getWidth());
         currentRowWidth += textWidth;
         if (currentRowWidth >= maxRowWidth) {
-            int fullRows = currentRowWidth / maxRowWidth;
-            currentHeightOccupied += fullRows * estimatedRowHeight;
+            int fullRows = (int) (Math.ceil((double) currentRowWidth / (double) maxRowWidth));
+            addRowsToOccupiedHeight(fullRows);
             currentRowWidth = currentRowWidth % maxRowWidth;
         }
     }
@@ -205,9 +216,20 @@ public class NewPptCreator {
         currentParagraph = currentBody.getTextParagraphs().get(0);
     }
 
+    public void setProjectInfo(ProjectGeneral projectInfo) {
+        this.projectInfo = projectInfo;
+    }
+
     public void createHeader() {
+        if (Objects.isNull(projectInfo)) {
+            projectInfo = new ProjectGeneral("", "", new Date());
+        }
+        String name = projectInfo.getProjectName();
+        String manager = projectInfo.getProjectManager();
+        String dateStr = projectInfo.getDate().toString();
+
         currentBody = currentSlide.createTextBox();
-        currentBody.setAnchor(new Rectangle(SLIDE_PADDING, SLIDE_PADDING, 500, 75));
+        currentBody.setAnchor(new Rectangle(SLIDE_PADDING, SLIDE_PADDING, 500, 60));
 
         currentParagraph = currentBody.getTextParagraphs().get(0);
         createDefaultTextRun();
@@ -215,7 +237,7 @@ public class NewPptCreator {
         currentTextRun.setText("Project name: ");
 
         createDefaultTextRun();
-        currentTextRun.setText("Project Pineapple");
+        currentTextRun.setText(name);
 
         currentParagraph.addLineBreak();
 
@@ -224,7 +246,7 @@ public class NewPptCreator {
         currentTextRun.setText("Project manager: ");
 
         createDefaultTextRun();
-        currentTextRun.setText("IKSANOV Aleksandr");
+        currentTextRun.setText(manager);
 
         currentParagraph.addLineBreak();
 
@@ -233,7 +255,9 @@ public class NewPptCreator {
         currentTextRun.setText("Last Updated: ");
 
         createDefaultTextRun();
-        currentTextRun.setText("2020-04-08");
+        currentTextRun.setText(dateStr);
+
+        addRowsToOccupiedHeight(2);
     }
 
     public void addRowsToOccupiedHeight(int rows) {
@@ -259,6 +283,7 @@ public class NewPptCreator {
         XSLFTextRun textRun = paragraph.addNewTextRun();
         paragraph.setTextAlign(TextParagraph.TextAlign.CENTER);
         textRun.setText(value);
+        textRun.setFontSize((double) FONT_SIZE);
         blackBorderedTableCellDecorator(cell);
     }
 
@@ -267,6 +292,7 @@ public class NewPptCreator {
         XSLFTextRun textRun = paragraph.addNewTextRun();
         paragraph.setTextAlign(TextParagraph.TextAlign.CENTER);
         textRun.setText("GREEN");
+        textRun.setFontSize((double) FONT_SIZE);
         cell.setFillColor(new Color(0, 255, 0));
         blackBorderedTableCellDecorator(cell);
     }
@@ -281,6 +307,10 @@ public class NewPptCreator {
         cell.setBorderColor(TableCell.BorderEdge.top, Color.black);
         cell.setBorderColor(TableCell.BorderEdge.left, Color.black);
         cell.setBorderColor(TableCell.BorderEdge.right, Color.black);
+    }
+
+    public void setFooterNeeded(boolean footerNeeded) {
+        this.footerNeeded = footerNeeded;
     }
 
     public void createFooter() {
@@ -312,14 +342,35 @@ public class NewPptCreator {
         currentTextRun.setFontSize(12.);
         currentTextRun.setText("Proprietary - Use pursuant to Company Instruction");
 
-        createFooterLine(y - 10);
+        createLine(y - 10);
     }
 
-    private void createFooterLine(int y) {
+    private void createLine(int y) {
         XSLFAutoShape line = currentSlide.createAutoShape();
         line.setShapeType(ShapeType.LINE);
         line.setAnchor(new Rectangle(SLIDE_PADDING, y, SLIDE_WIDTH - SLIDE_PADDING * 2, 1));
         line.setLineColor(Color.black);
+    }
+
+    public void setCurrentSectionName(String currentSectionName) {
+        this.currentSectionName = currentSectionName;
+    }
+
+    public void createSlideName() {
+        if (Objects.isNull(currentSectionName)) {
+            return;
+        }
+        currentBody = currentSlide.createTextBox();
+        currentBody.setAnchor(new Rectangle(SLIDE_PADDING, currentHeightOccupied + 17, SLIDE_WIDTH - SLIDE_PADDING * 2, 17));
+        currentParagraph = currentBody.getTextParagraphs().get(0);
+        createDefaultTextRun();
+
+        currentTextRun.setBold(true);
+        currentTextRun.setText(currentSectionName);
+
+        createLine(currentHeightOccupied + 38);
+
+        addRowsToOccupiedHeight(1);
     }
 
     public void save(String filepath) throws IOException {

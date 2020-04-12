@@ -2,6 +2,7 @@ package com.company;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Date;
 
 public class Main {
 
@@ -12,11 +13,13 @@ public class Main {
         File file = new File(path);
 
         NewPptCreator ppt = new NewPptCreator();
+        ppt.setFooterNeeded(true);
+        ppt.setProjectInfo(new ProjectGeneral("Project Grape", "IKSANOV Aleksandr", new Date()));
+        ppt.setCurrentSectionName("Executive Status Summary");
         ppt.createNewSlide();
-        ppt.createHeader();
-        ppt.addRowsToOccupiedHeight(6);
+//        ppt.createHeader();
+//        ppt.addRowsToOccupiedHeight(6);
         ppt.createIndicatorsTable();
-        ppt.createFooter();
         ppt.addTextWorkingArea();
 //        ppt.initDefaultSlide();
         HtmlExtractor htmlExtractor = new HtmlExtractor(ppt);
