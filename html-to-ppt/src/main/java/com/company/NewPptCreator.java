@@ -23,12 +23,9 @@ public class NewPptCreator {
     private final int FONT_SIZE = 14;
     private final String FONT_NAME = "Calibri";
     private final int SLIDE_PADDING = 20;
-    private final int LAST_ELEMENT_Y_END = 0;
-
 
     private XMLSlideShow ppt;
     private XSLFSlide currentSlide;
-    //TODO: rename to "currentWorkingArea"
     private XSLFTextShape currentBody;
     private XSLFTextParagraph currentParagraph;
     private XSLFTextRun currentTextRun;
@@ -36,15 +33,13 @@ public class NewPptCreator {
 
     private String currentSectionName;
     private int currentRowWidth = 0;
-    private int currentHeightOccupied = 0;
+    private int currentY = 0;
     private int footerSize = 0;
     private int maxRowWidth = SLIDE_WIDTH - SLIDE_PADDING * 2;
     private int estimatedRowHeight;
     private boolean footerNeeded = true;
-
-
-    //TEST
-    private boolean firstSlide = true;
+    private int dynamicWorkingAreaHeight;
+    private int currentWorkingAreaUsage = 0;
 
     public NewPptCreator() {
         ppt = createPpt();
@@ -72,7 +67,7 @@ public class NewPptCreator {
         XSLFSlideMaster slideMaster = ppt.getSlideMasters().get(0);
         XSLFSlideLayout layout = slideMaster.getLayout(SlideLayout.BLANK);
         currentSlide = ppt.createSlide(layout);
-        currentHeightOccupied += SLIDE_PADDING;
+        currentY += SLIDE_PADDING;
         createHeader();
         addRowsToOccupiedHeight(1);
         createSlideName();
@@ -84,9 +79,11 @@ public class NewPptCreator {
     public void addTextWorkingArea() {
         XSLFTextBox workingArea = currentSlide.createTextBox();
         int width = SLIDE_WIDTH - SLIDE_PADDING * 2;
-        int height = SLIDE_HEIGHT - currentHeightOccupied - footerSize - SLIDE_PADDING;
-        workingArea.setAnchor(new Rectangle(SLIDE_PADDING, currentHeightOccupied, width, height));
+        int height = SLIDE_HEIGHT - currentY - footerSize - SLIDE_PADDING;
+        workingArea.setAnchor(new Rectangle(SLIDE_PADDING, currentY, width, height));
         currentBody = workingArea;
+        dynamicWorkingAreaHeight = height;
+        currentY += height;
     }
 
     public void createNewParagraph(boolean bulletsNeeded) {
@@ -106,11 +103,7 @@ public class NewPptCreator {
         }
 
         currentRowWidth = 0;
-        addRowsToOccupiedHeight(1);
-
-        if (firstSlide) {
-            System.out.println("Paragraph created for: ");
-        }
+        currentWorkingAreaUsage += estimatedRowHeight;
     }
 
     private boolean isNumericBulletsNeeded(Element element) {
@@ -203,22 +196,25 @@ public class NewPptCreator {
         currentRowWidth += textWidth;
         if (currentRowWidth >= maxRowWidth) {
             int fullRows = (int) (Math.floor((double) currentRowWidth / (double) maxRowWidth));
-            addRowsToOccupiedHeight(fullRows);
+            currentWorkingAreaUsage += estimatedRowHeight * fullRows;
             currentRowWidth = currentRowWidth % maxRowWidth;
         }
     }
 
     private boolean isOverflowIfExists() {
-        return currentHeightOccupied > SLIDE_HEIGHT - footerSize;
+        return currentWorkingAreaUsage > dynamicWorkingAreaHeight;
     }
 
     public void addNextSlide() {
-        if (currentHeightOccupied > SLIDE_HEIGHT) {
-            currentHeightOccupied -= SLIDE_HEIGHT;
+        if (currentWorkingAreaUsage > dynamicWorkingAreaHeight) {
+            currentWorkingAreaUsage -= dynamicWorkingAreaHeight;
+            dynamicWorkingAreaHeight = 0;
         } else {
-            currentHeightOccupied = 0;
+            currentWorkingAreaUsage = 0;
             currentRowWidth = 0;
         }
+
+        currentY = 0;
         createNewSlide();
         addTextWorkingArea();
         currentParagraph = currentBody.getTextParagraphs().get(0);
@@ -265,12 +261,11 @@ public class NewPptCreator {
         createDefaultTextRun();
         currentTextRun.setText(dateStr);
 
-        currentHeightOccupied += 60;
-//        addRowsToOccupiedHeight(3);
+        currentY += 60;
     }
 
     public void addRowsToOccupiedHeight(int rows) {
-        currentHeightOccupied += estimatedRowHeight * rows;
+        currentY += estimatedRowHeight * rows;
     }
 
     public void createIndicatorsTable() {
@@ -370,18 +365,15 @@ public class NewPptCreator {
             return;
         }
         currentBody = currentSlide.createTextBox();
-        currentBody.setAnchor(new Rectangle(SLIDE_PADDING, currentHeightOccupied, SLIDE_WIDTH - SLIDE_PADDING * 2, 17));
+        currentBody.setAnchor(new Rectangle(SLIDE_PADDING, currentY, SLIDE_WIDTH - SLIDE_PADDING * 2, 17));
         currentParagraph = currentBody.getTextParagraphs().get(0);
         createDefaultTextRun();
 
         currentTextRun.setBold(true);
         currentTextRun.setText(currentSectionName);
 
-        currentHeightOccupied += 25;
-//        addRowsToOccupiedHeight(2);
-        createLine(currentHeightOccupied);
-
-//        addRowsToOccupiedHeight(1);
+        currentY += 25;
+        createLine(currentY);
     }
 
     public void save(String filepath) throws IOException {
