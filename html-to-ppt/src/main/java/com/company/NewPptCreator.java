@@ -38,10 +38,13 @@ public class NewPptCreator {
     private int currentRowWidth = 0;
     private int currentHeightOccupied = 0;
     private int footerSize = 0;
-    private int maxRowWidth = SLIDE_WIDTH - SLIDE_PADDING * 2 + 350;
+    private int maxRowWidth = SLIDE_WIDTH - SLIDE_PADDING * 2;
     private int estimatedRowHeight;
     private boolean footerNeeded = true;
 
+
+    //TEST
+    private boolean firstSlide = true;
 
     public NewPptCreator() {
         ppt = createPpt();
@@ -62,15 +65,16 @@ public class NewPptCreator {
         AffineTransform affineTransform = new AffineTransform();
         FontRenderContext frc = new FontRenderContext(affineTransform, true, true);
         Font font = new Font(FONT_NAME, Font.PLAIN, FONT_SIZE);
-        return (int) font.getStringBounds(text, frc).getHeight();
+        return (int) Math.ceil(font.getStringBounds(text, frc).getHeight());
     }
 
     public void createNewSlide() {
         XSLFSlideMaster slideMaster = ppt.getSlideMasters().get(0);
         XSLFSlideLayout layout = slideMaster.getLayout(SlideLayout.BLANK);
         currentSlide = ppt.createSlide(layout);
-        currentHeightOccupied += SLIDE_PADDING * 2;
+        currentHeightOccupied += SLIDE_PADDING;
         createHeader();
+        addRowsToOccupiedHeight(1);
         createSlideName();
         if (footerNeeded) {
             createFooter();
@@ -80,8 +84,8 @@ public class NewPptCreator {
     public void addTextWorkingArea() {
         XSLFTextBox workingArea = currentSlide.createTextBox();
         int width = SLIDE_WIDTH - SLIDE_PADDING * 2;
-        int height = SLIDE_HEIGHT - currentHeightOccupied - footerSize;
-        workingArea.setAnchor(new Rectangle(SLIDE_PADDING, currentHeightOccupied + SLIDE_PADDING, width, height));
+        int height = SLIDE_HEIGHT - currentHeightOccupied - footerSize - SLIDE_PADDING;
+        workingArea.setAnchor(new Rectangle(SLIDE_PADDING, currentHeightOccupied, width, height));
         currentBody = workingArea;
     }
 
@@ -103,6 +107,10 @@ public class NewPptCreator {
 
         currentRowWidth = 0;
         addRowsToOccupiedHeight(1);
+
+        if (firstSlide) {
+            System.out.println("Paragraph created for: ");
+        }
     }
 
     private boolean isNumericBulletsNeeded(Element element) {
@@ -191,10 +199,10 @@ public class NewPptCreator {
         FontRenderContext frc = new FontRenderContext(affineTransform, true, true);
         Font font = new Font(FONT_NAME, Font.PLAIN, FONT_SIZE);
 
-        int textWidth = (int) Math.ceil(font.getStringBounds(text, frc).getWidth());
+        int textWidth = (int) Math.ceil(font.getStringBounds(text.trim(), frc).getWidth());
         currentRowWidth += textWidth;
         if (currentRowWidth >= maxRowWidth) {
-            int fullRows = (int) (Math.ceil((double) currentRowWidth / (double) maxRowWidth));
+            int fullRows = (int) (Math.floor((double) currentRowWidth / (double) maxRowWidth));
             addRowsToOccupiedHeight(fullRows);
             currentRowWidth = currentRowWidth % maxRowWidth;
         }
@@ -257,7 +265,8 @@ public class NewPptCreator {
         createDefaultTextRun();
         currentTextRun.setText(dateStr);
 
-        addRowsToOccupiedHeight(2);
+        currentHeightOccupied += 60;
+//        addRowsToOccupiedHeight(3);
     }
 
     public void addRowsToOccupiedHeight(int rows) {
@@ -361,16 +370,18 @@ public class NewPptCreator {
             return;
         }
         currentBody = currentSlide.createTextBox();
-        currentBody.setAnchor(new Rectangle(SLIDE_PADDING, currentHeightOccupied + 17, SLIDE_WIDTH - SLIDE_PADDING * 2, 17));
+        currentBody.setAnchor(new Rectangle(SLIDE_PADDING, currentHeightOccupied, SLIDE_WIDTH - SLIDE_PADDING * 2, 17));
         currentParagraph = currentBody.getTextParagraphs().get(0);
         createDefaultTextRun();
 
         currentTextRun.setBold(true);
         currentTextRun.setText(currentSectionName);
 
-        createLine(currentHeightOccupied + 38);
+        currentHeightOccupied += 25;
+//        addRowsToOccupiedHeight(2);
+        createLine(currentHeightOccupied);
 
-        addRowsToOccupiedHeight(1);
+//        addRowsToOccupiedHeight(1);
     }
 
     public void save(String filepath) throws IOException {
