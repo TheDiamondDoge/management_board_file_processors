@@ -24,6 +24,7 @@ public class Main {
 //        ppt.createHeader();
 //        ppt.addRowsToOccupiedHeight(6);
         ppt.createIndicatorsTable();
+        ppt.createTimeline();
         ppt.addTextWorkingArea();
 //        ppt.initDefaultSlide();
         HtmlExtractor htmlExtractor = new HtmlExtractor(ppt);

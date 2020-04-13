@@ -376,6 +376,89 @@ public class NewPptCreator {
         createLine(currentY);
     }
 
+    public void createTimeline() {
+        int milestonesAmount = 10;
+        createLine(currentY);
+
+        XSLFAutoShape line = currentSlide.createAutoShape();
+        line.setShapeType(ShapeType.RECT);
+        int width = SLIDE_WIDTH - SLIDE_PADDING * 4;
+        int x = SLIDE_PADDING * 2;
+        int y = currentY + 75;
+        line.setAnchor(new Rectangle(SLIDE_PADDING * 2, currentY + 75, width, 2));
+        line.setLineColor(Color.black);
+        line.setFillColor(Color.black);
+
+        timelineLegend(x, y + 25);
+
+        int leftMargin = 100;
+        int step = (width - leftMargin) / (milestonesAmount + 1);
+        int currentXPosition = x + leftMargin;
+        for (int i = 0; i < milestonesAmount; i++) {
+            currentXPosition += step;
+            milestoneIndicator(currentXPosition, y);
+            milestoneHeader(currentXPosition - 35, y - 50, "DR" + i, 0);
+            milestoneDates(currentXPosition - 50, y + 25);
+            System.out.println("X: " + currentXPosition);
+        }
+
+        currentY += 170;
+        createLine(currentY);
+    }
+
+    private void milestoneIndicator(int x, int y) {
+        int offsetY = 9;
+        XSLFAutoShape rect = currentSlide.createAutoShape();
+        rect.setShapeType(ShapeType.RECT);
+        rect.setAnchor(new Rectangle(x, y - offsetY, 2, offsetY * 2));
+        rect.setFillColor(Color.black);
+        rect.setLineColor(Color.black);
+    }
+
+    private void milestoneHeader(int x, int y, String label, int status) {
+        currentBody = currentSlide.createTextBox();
+        currentBody.setAnchor(new Rectangle(x, y, 70, 17));
+
+        currentParagraph = currentBody.getTextParagraphs().get(0);
+        currentParagraph.setTextAlign(TextParagraph.TextAlign.CENTER);
+
+        createDefaultTextRun();
+        currentTextRun.setText(label);
+    }
+
+    private void milestoneDates(int x, int y) {
+        String actual = "12-Jul-20";
+        String baseline = "31-Dec-20";
+
+        currentBody = currentSlide.createTextBox();
+        currentBody.setAnchor(new Rectangle(x, y, 100, 35));
+
+        currentParagraph = currentBody.getTextParagraphs().get(0);
+        currentParagraph.setTextAlign(TextParagraph.TextAlign.CENTER);
+        createDefaultTextRun();
+        currentTextRun.setText(actual);
+
+        currentParagraph.addLineBreak();
+
+        createDefaultTextRun();
+        currentTextRun.setText(baseline);
+    }
+
+    private void timelineLegend(int x, int y) {
+        currentBody = currentSlide.createTextBox();
+        currentBody.setAnchor(new Rectangle(x, y, 140, 35));
+
+        currentParagraph = currentBody.getTextParagraphs().get(0);
+        currentParagraph.setTextAlign(TextParagraph.TextAlign.LEFT);
+        createDefaultTextRun();
+        currentTextRun.setText("Baseline");
+
+        currentParagraph.addLineBreak();
+
+        createDefaultTextRun();
+        currentTextRun.setText("Actual / Forecast");
+    }
+
     public void save(String filepath) throws IOException {
         File file = new File(filepath);
         FileOutputStream out = new FileOutputStream(file);
