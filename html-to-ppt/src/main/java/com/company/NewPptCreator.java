@@ -1,6 +1,7 @@
 package com.company;
 
 import org.apache.poi.sl.usermodel.*;
+import org.apache.poi.util.IOUtils;
 import org.apache.poi.xslf.usermodel.*;
 import org.jsoup.nodes.Element;
 import org.jsoup.nodes.Node;
@@ -9,13 +10,13 @@ import org.jsoup.nodes.TextNode;
 import java.awt.*;
 import java.awt.font.FontRenderContext;
 import java.awt.geom.AffineTransform;
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.util.Date;
-import java.util.Objects;
+import java.io.*;
+import java.text.SimpleDateFormat;
+import java.util.*;
+import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 public class NewPptCreator {
     private final int SLIDE_WIDTH = 1280;
@@ -346,10 +347,28 @@ public class NewPptCreator {
         currentTextRun.setFontSize(12.);
         currentTextRun.setText("Proprietary - Use pursuant to Company Instruction");
 
-        createLine(y - 10);
+        currentBody = currentSlide.createTextBox();
+        currentBody.setAnchor(new Rectangle(SLIDE_PADDING, SLIDE_HEIGHT - SLIDE_PADDING - 40, 80, 17));
+
+        currentParagraph = currentBody.getTextParagraphs().get(0);
+        createDefaultTextRun();
+        currentTextRun.setText("Page " + currentSlide.getSlideNumber());
+
+        try {
+            int width = 180;
+            int height = 45;
+            byte[] picture = IOUtils.toByteArray(new FileInputStream("src/main/resources/img/logo.png"));
+            XSLFPictureData pictureData = ppt.addPicture(picture, XSLFPictureData.PictureType.PNG);
+            XSLFPictureShape pictureShape = currentSlide.createPicture(pictureData);
+            pictureShape.setAnchor(new Rectangle(SLIDE_WIDTH - SLIDE_PADDING - width, y, width, height));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        drawLine(y - 10);
     }
 
-    private void createLine(int y) {
+    private void drawLine(int y) {
         XSLFAutoShape line = currentSlide.createAutoShape();
         line.setShapeType(ShapeType.LINE);
         line.setAnchor(new Rectangle(SLIDE_PADDING, y, SLIDE_WIDTH - SLIDE_PADDING * 2, 1));
@@ -373,40 +392,87 @@ public class NewPptCreator {
         currentTextRun.setText(currentSectionName);
 
         currentY += 25;
-        createLine(currentY);
+        drawLine(currentY);
     }
 
-    public void createTimeline() {
-        int milestonesAmount = 10;
-        createLine(currentY);
+    public void createTimeline(List<MilestoneDTO> milestones, IndicatorStatus status) {
 
-        XSLFAutoShape line = currentSlide.createAutoShape();
-        line.setShapeType(ShapeType.RECT);
-        int width = SLIDE_WIDTH - SLIDE_PADDING * 4;
+        drawLine(currentY);
+        currentY += 10;
+
         int x = SLIDE_PADDING * 2;
         int y = currentY + 75;
-        line.setAnchor(new Rectangle(SLIDE_PADDING * 2, currentY + 75, width, 2));
-        line.setLineColor(Color.black);
-        line.setFillColor(Color.black);
-
-        timelineLegend(x, y + 25);
-
+        int width = SLIDE_WIDTH - SLIDE_PADDING * 4;
         int leftMargin = 100;
-        int step = (width - leftMargin) / (milestonesAmount + 1);
-        int currentXPosition = x + leftMargin;
-        for (int i = 0; i < milestonesAmount; i++) {
-            currentXPosition += step;
-            milestoneIndicator(currentXPosition, y);
-            milestoneHeader(currentXPosition - 35, y - 50, "DR" + i, 0);
-            milestoneDates(currentXPosition - 50, y + 25);
-            System.out.println("X: " + currentXPosition);
+
+        drawTimeLine(x, y, width);
+        drawTimelineLegend(x, y + 25);
+
+        boolean curDayMilFound = false;
+        int timelineIndicatorX = width / 2 + leftMargin;
+        if (Objects.nonNull(milestones)) {
+            List<MilestoneDTO> sortedMilestones = milestones.stream()
+                    .filter(mil -> Objects.nonNull(mil.getActualDate()))
+                    .sorted(MilestoneDTO::compareTo)
+                    .collect(Collectors.toList());
+
+            int milestonesAmount = sortedMilestones.size();
+            int step = (width - leftMargin) / (milestonesAmount + 1);
+            int currentXPosition = x + leftMargin;
+            for (MilestoneDTO milestone : sortedMilestones) {
+                currentXPosition += step;
+                drawMilestoneIndicator(currentXPosition, y);
+                drawMilestoneHeader(currentXPosition - 35, y - 50, milestone.getLabel(), Utils.getMilestoneStatus(milestone));
+                drawMilestoneDates(currentXPosition - 50, y + 25, milestone.getActualDate(), milestone.getBaselineDate());
+
+                if (!curDayMilFound) {
+                    int compareResult = Utils.compareWithToday(milestone.getActualDate());
+                    if (compareResult != -1) {
+                        if (compareResult == 0) {
+                            timelineIndicatorX = currentXPosition - 8;
+                            curDayMilFound = true;
+                        } else if (compareResult == 1) {
+                            timelineIndicatorX = currentXPosition - (step / 2) - 8;
+                        }
+                    }
+                }
+            }
         }
 
-        currentY += 170;
-        createLine(currentY);
+        drawTimelineStatusIndicator(timelineIndicatorX, y - 16, status);
+        currentY += 175;
+        drawTimelineExplanation(SLIDE_PADDING, currentY - 20);
+        drawLine(currentY);
     }
 
-    private void milestoneIndicator(int x, int y) {
+    private void drawTimelineStatusIndicator(int x, int y, IndicatorStatus status) {
+        XSLFAutoShape indicator = currentSlide.createAutoShape();
+        indicator.setShapeType(ShapeType.ROUND_RECT);
+        indicator.setAnchor(new Rectangle(x, y, 16, 32));
+        indicator.setLineColor(Color.black);
+        indicator.setFillColor(Utils.getColorByIndStatus(status));
+        indicator.setText(Utils.getSymbolByIndStatus(status));
+        indicator.setHorizontalCentered(true);
+    }
+
+    private void drawTimeLine(int x, int y, int width) {
+        XSLFAutoShape line = currentSlide.createAutoShape();
+        line.setShapeType(ShapeType.RECT);
+        line.setAnchor(new Rectangle(x, y, width, 2));
+        line.setLineColor(Color.black);
+        line.setFillColor(Color.black);
+    }
+
+    private void drawTimelineExplanation(int x, int y) {
+        currentBody = currentSlide.createTextBox();
+        currentBody.setAnchor(new Rectangle(x, y, 250, 17));
+        currentParagraph = currentBody.getTextParagraphs().get(0);
+        createDefaultTextRun();
+        currentTextRun.setText("* Committed dates are DR1 baseline dates");
+        currentTextRun.setFontSize(12.);
+    }
+
+    private void drawMilestoneIndicator(int x, int y) {
         int offsetY = 9;
         XSLFAutoShape rect = currentSlide.createAutoShape();
         rect.setShapeType(ShapeType.RECT);
@@ -415,7 +481,7 @@ public class NewPptCreator {
         rect.setLineColor(Color.black);
     }
 
-    private void milestoneHeader(int x, int y, String label, int status) {
+    private void drawMilestoneHeader(int x, int y, String label, MilestoneStatus status) {
         currentBody = currentSlide.createTextBox();
         currentBody.setAnchor(new Rectangle(x, y, 70, 17));
 
@@ -424,11 +490,18 @@ public class NewPptCreator {
 
         createDefaultTextRun();
         currentTextRun.setText(label);
+
+        try {
+            addMilestoneCompletion(x + 25, y - 25, status);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
-    private void milestoneDates(int x, int y) {
-        String actual = "12-Jul-20";
-        String baseline = "31-Dec-20";
+    private void drawMilestoneDates(int x, int y, Date actualDate, Date baselineDate) {
+        SimpleDateFormat formatter = new SimpleDateFormat("dd-MMM-yy", Locale.ENGLISH);
+        String actual = formatter.format(actualDate);
+        String baseline = formatter.format(baselineDate);
 
         currentBody = currentSlide.createTextBox();
         currentBody.setAnchor(new Rectangle(x, y, 100, 35));
@@ -444,14 +517,24 @@ public class NewPptCreator {
         currentTextRun.setText(baseline);
     }
 
-    private void timelineLegend(int x, int y) {
+    private void addMilestoneCompletion(int x, int y, MilestoneStatus status) throws IOException {
+        if (status != MilestoneStatus.BLANK) {
+            String imgPath = "src/main/resources/img/" + status.getValue() + ".png";
+            byte[] picture = IOUtils.toByteArray(new FileInputStream(imgPath));
+            XSLFPictureData pictureData = ppt.addPicture(picture, XSLFPictureData.PictureType.PNG);
+            XSLFPictureShape pictureShape = currentSlide.createPicture(pictureData);
+            pictureShape.setAnchor(new Rectangle(x, y, 20, 20));
+        }
+    }
+
+    private void drawTimelineLegend(int x, int y) {
         currentBody = currentSlide.createTextBox();
         currentBody.setAnchor(new Rectangle(x, y, 140, 35));
 
         currentParagraph = currentBody.getTextParagraphs().get(0);
         currentParagraph.setTextAlign(TextParagraph.TextAlign.LEFT);
         createDefaultTextRun();
-        currentTextRun.setText("Baseline");
+        currentTextRun.setText("Committed *");
 
         currentParagraph.addLineBreak();
 

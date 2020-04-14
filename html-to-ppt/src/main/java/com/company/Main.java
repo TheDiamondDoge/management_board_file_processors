@@ -2,7 +2,10 @@ package com.company;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.Date;
+import java.sql.Array;
+import java.sql.Date;
+import java.util.Arrays;
+import java.util.List;
 
 public class Main {
 
@@ -18,13 +21,13 @@ public class Main {
 
         NewPptCreator ppt = new NewPptCreator();
         ppt.setFooterNeeded(true);
-        ppt.setProjectInfo(new ProjectGeneral("Project Grape", "IKSANOV Aleksandr", new Date()));
+        ppt.setProjectInfo(new ProjectGeneral("Project Grape", "IKSANOV Aleksandr", new java.util.Date()));
         ppt.setCurrentSectionName("Executive Status Summary");
         ppt.createNewSlide();
 //        ppt.createHeader();
 //        ppt.addRowsToOccupiedHeight(6);
         ppt.createIndicatorsTable();
-        ppt.createTimeline();
+        ppt.createTimeline(getMilestones(), IndicatorStatus.GREEN);
         ppt.addTextWorkingArea();
 //        ppt.initDefaultSlide();
         HtmlExtractor htmlExtractor = new HtmlExtractor(ppt);
@@ -34,5 +37,12 @@ public class Main {
 //        htmlExtractor.extract(html);
 //        ppt.createHeader();
         ppt.save("TextFormat.pptx");
+    }
+
+    public static List<MilestoneDTO> getMilestones() {
+        MilestoneDTO milestoneDTO1 = new MilestoneDTO("DR1", new Date(1586476800000L), new Date(1586563200000L), 0, "http://www.google.com", true);
+        MilestoneDTO milestoneDTO2 = new MilestoneDTO("DR2", new Date(1586476800000L), new Date(1586476800000L), 0, "http://www.google.com", true);
+        MilestoneDTO milestoneDTO3 = new MilestoneDTO("DR3", new Date(1587254400000L), new Date(1587254400000L), 100, "http://www.google.com", true);
+        return Arrays.asList(milestoneDTO1, milestoneDTO2, milestoneDTO3);
     }
 }
