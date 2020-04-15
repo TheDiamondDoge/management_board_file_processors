@@ -1,7 +1,6 @@
-package com.company;
+package com.company.data;
 
 import java.sql.Date;
-import java.util.Comparator;
 
 public class MilestoneDTO implements Comparable<MilestoneDTO> {
     private String label;

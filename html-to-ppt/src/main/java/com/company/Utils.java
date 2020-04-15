@@ -1,8 +1,14 @@
 package com.company;
 
+import com.company.data.MilestoneDTO;
+import com.company.enums.IndicatorStatus;
+import com.company.enums.MilestoneStatus;
+
 import java.awt.*;
 import java.sql.Date;
+import java.text.SimpleDateFormat;
 import java.util.Calendar;
+import java.util.Locale;
 
 public class Utils {
     public static MilestoneStatus getMilestoneStatus(MilestoneDTO milestone) {
@@ -51,16 +57,29 @@ public class Utils {
     }
 
     public static String getSymbolByIndStatus(IndicatorStatus status) {
+        return getSymbolByIndStatus(status, false);
+    }
+
+    public static String getSymbolByIndStatus(IndicatorStatus status, boolean full) {
         switch (status) {
             case RED:
-                return "R";
+                return full ? "RED" : "R";
             case YELLOW:
-                return "Y";
+                return full ? "YELLOW" : "Y";
             case GREEN:
-                return "G";
+                return full ? "GREEN" : "G";
             default:
                 return "";
 
         }
+    }
+
+    public static boolean isUrl(String url) {
+        return url.startsWith("http://") || url.startsWith("https://");
+    }
+
+    public static String formatDate(java.util.Date date) {
+        SimpleDateFormat formatter = new SimpleDateFormat("dd-MMM-yy", Locale.ENGLISH);
+        return formatter.format(date);
     }
 }

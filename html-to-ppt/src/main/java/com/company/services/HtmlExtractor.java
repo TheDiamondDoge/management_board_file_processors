@@ -1,4 +1,4 @@
-package com.company;
+package com.company.services;
 
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -38,16 +38,13 @@ public class HtmlExtractor {
     private void writeNodeToPpt(Element e, boolean isRecursiveCall) {
         List<Node> childNodes = e.childNodesCopy();
         if (isNewParagraphNeeded(e)) {
-            if (isBulletsNeeded(e)) {
-                pptCreator.createNewParagraph(true);
-            } else {
-                pptCreator.createNewParagraph(false);
-            }
+            pptCreator.createNewParagraph(isBulletsNeeded(e));
         }
 
         for (Node node : childNodes) {
             if (isTextNode(node)) {
-                pptCreator.prepareDocForText(node);
+                TextNode tNode = (TextNode) node;
+                pptCreator.prepareDocForText(tNode.text());
                 elements.forEach(elem -> pptCreator.decorateTextRun(elem));
                 pptCreator.addNodeToSlide(node);
             } else if (isElementNode(node)){

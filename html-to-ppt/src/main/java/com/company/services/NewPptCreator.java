@@ -1,5 +1,13 @@
-package com.company;
+package com.company.services;
 
+import com.company.Utils;
+import com.company.data.Indicators;
+import com.company.data.MilestoneDTO;
+import com.company.data.ProjectGeneral;
+import com.company.data.Requirements;
+import com.company.enums.IndicatorStatus;
+import com.company.enums.MilestoneStatus;
+import com.sun.javaws.exceptions.InvalidArgumentException;
 import org.apache.poi.sl.usermodel.*;
 import org.apache.poi.util.IOUtils;
 import org.apache.poi.xslf.usermodel.*;
@@ -11,7 +19,6 @@ import java.awt.*;
 import java.awt.font.FontRenderContext;
 import java.awt.geom.AffineTransform;
 import java.io.*;
-import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.List;
 import java.util.regex.Matcher;
@@ -68,7 +75,7 @@ public class NewPptCreator {
         XSLFSlideMaster slideMaster = ppt.getSlideMasters().get(0);
         XSLFSlideLayout layout = slideMaster.getLayout(SlideLayout.BLANK);
         currentSlide = ppt.createSlide(layout);
-        currentY += SLIDE_PADDING;
+        currentY = SLIDE_PADDING;
         createHeader();
         addRowsToOccupiedHeight(1);
         createSlideName();
@@ -99,8 +106,11 @@ public class NewPptCreator {
         currentParagraph = currentBody.addNewTextParagraph();
         currentParagraph.setBullet(bulletsNeeded);
 
-        if (bulletsNeeded && Objects.nonNull(element) && isNumericBulletsNeeded(element)) {
-            currentParagraph.setBulletAutoNumber(AutoNumberingScheme.arabicPlain, 1);
+        if (bulletsNeeded) {
+            currentParagraph.setBulletCharacter("-");
+            if (Objects.nonNull(element) && isNumericBulletsNeeded(element)) {
+                currentParagraph.setBulletAutoNumber(AutoNumberingScheme.arabicPlain, 1);
+            }
         }
 
         currentRowWidth = 0;
@@ -125,13 +135,14 @@ public class NewPptCreator {
         String style = e.attr("style");
         String[] styleAttrs = style.split(";");
 
-        addDecorationByTag(currentTextRun, tag);
+        addDecorationByTag(currentTextRun, e);
         for (String attr : styleAttrs) {
             addDecorationByStyle(currentTextRun, attr);
         }
     }
 
-    private void addDecorationByTag(XSLFTextRun run, String tag) {
+    private void addDecorationByTag(XSLFTextRun run, Element e) {
+        String tag = e.tagName();
         switch (tag.toLowerCase()) {
             case "u":
                 run.setUnderlined(true);
@@ -142,6 +153,9 @@ public class NewPptCreator {
             case "s":
                 run.setStrikethrough(true);
                 break;
+            case "a":
+                String href = e.attr("href");
+                run.createHyperlink().setAddress(href);
         }
     }
 
@@ -173,9 +187,8 @@ public class NewPptCreator {
         return Color.BLACK;
     }
 
-    public void prepareDocForText(Node node) {
-        TextNode textNode = (TextNode) node;
-        increaseCharsAmount(textNode.text());
+    public void prepareDocForText(String text) {
+        increaseCharsAmount(text);
         if (isOverflowIfExists()) {
             addNextSlide();
         }
@@ -221,17 +234,37 @@ public class NewPptCreator {
         currentParagraph = currentBody.getTextParagraphs().get(0);
     }
 
+    public void addRequirementsToSlide(List<Requirements> requirements) {
+        for (Requirements rq : requirements) {
+            createNewParagraph(true);
+            createDefaultTextRun();
+            currentTextRun.setBold(true);
+            currentTextRun.setUnderlined(true);
+            currentTextRun.setText(rq.getReqId() + ": ");
+
+            createDefaultTextRun();
+            currentTextRun.setText(rq.getHeadline());
+
+            createDefaultTextRun();
+            currentTextRun.setUnderlined(true);
+            currentTextRun.setText(" Status: ");
+
+            createDefaultTextRun();
+            currentTextRun.setText(rq.getStatus());
+        }
+    }
+
     public void setProjectInfo(ProjectGeneral projectInfo) {
         this.projectInfo = projectInfo;
     }
 
     public void createHeader() {
         if (Objects.isNull(projectInfo)) {
-            projectInfo = new ProjectGeneral("", "", new Date());
+            projectInfo = new ProjectGeneral("", "", "", new Date());
         }
         String name = projectInfo.getProjectName();
         String manager = projectInfo.getProjectManager();
-        String dateStr = projectInfo.getDate().toString();
+        String dateStr = Utils.formatDate(projectInfo.getDate());
 
         currentBody = currentSlide.createTextBox();
         currentBody.setAnchor(new Rectangle(SLIDE_PADDING, SLIDE_PADDING, 500, 60));
@@ -243,6 +276,8 @@ public class NewPptCreator {
 
         createDefaultTextRun();
         currentTextRun.setText(name);
+        XSLFHyperlink projectUrl = currentTextRun.createHyperlink();
+        projectUrl.setAddress(projectInfo.getUrl());
 
         currentParagraph.addLineBreak();
 
@@ -269,18 +304,43 @@ public class NewPptCreator {
         currentY += estimatedRowHeight * rows;
     }
 
-    public void createIndicatorsTable() {
+    public void createIndicatorsTable(Indicators indicators) {
         XSLFTable table = currentSlide.createTable(2, 4);
         table.setAnchor(new Rectangle(SLIDE_WIDTH - SLIDE_PADDING - 400, SLIDE_PADDING, 350, 75));
 
         String[] labels = {"Schedule", "Scope", "Quality", "Cost"};
         for (int i = 0; i < labels.length; i++) {
+            String label = labels[i];
             XSLFTableCell headerCell = table.getCell(0, i);
-            decorateThForIndicators(headerCell, labels[i]);
+            decorateThForIndicators(headerCell, label);
 
             XSLFTableCell valueCell = table.getCell(1, i);
-            decorateTdForIndicators(valueCell);
+            decorateTdForIndicators(valueCell, getIndicatorsStatus(indicators, label));
         }
+    }
+
+    private IndicatorStatus getIndicatorsStatus(Indicators indicators, String label) {
+        if (Objects.isNull(indicators)) {
+            return IndicatorStatus.BLANK;
+        }
+        try {
+            switch (label.toLowerCase()) {
+                case "overall":
+                    return IndicatorStatus.getStatus(indicators.getOverall());
+                case "schedule":
+                    return IndicatorStatus.getStatus(indicators.getSchedule());
+                case "scope":
+                    return IndicatorStatus.getStatus(indicators.getScope());
+                case "quality":
+                    return IndicatorStatus.getStatus(indicators.getQuality());
+                case "cost":
+                    return IndicatorStatus.getStatus(indicators.getCost());
+            }
+        } catch (InvalidArgumentException e) {
+            e.printStackTrace();
+        }
+
+        return IndicatorStatus.BLANK;
     }
 
     private void decorateThForIndicators(XSLFTableCell cell, String value) {
@@ -292,13 +352,13 @@ public class NewPptCreator {
         blackBorderedTableCellDecorator(cell);
     }
 
-    private void decorateTdForIndicators(XSLFTableCell cell) {
+    private void decorateTdForIndicators(XSLFTableCell cell, IndicatorStatus status) {
         XSLFTextParagraph paragraph = cell.addNewTextParagraph();
         XSLFTextRun textRun = paragraph.addNewTextRun();
         paragraph.setTextAlign(TextParagraph.TextAlign.CENTER);
-        textRun.setText("GREEN");
+        textRun.setText(Utils.getSymbolByIndStatus(status, true));
         textRun.setFontSize((double) FONT_SIZE);
-        cell.setFillColor(new Color(0, 255, 0));
+        cell.setFillColor(Utils.getColorByIndStatus(status));
         blackBorderedTableCellDecorator(cell);
     }
 
@@ -355,12 +415,12 @@ public class NewPptCreator {
         currentTextRun.setText("Page " + currentSlide.getSlideNumber());
 
         try {
-            int width = 180;
-            int height = 45;
+            int width = 162;
+            int height = 41;
             byte[] picture = IOUtils.toByteArray(new FileInputStream("src/main/resources/img/logo.png"));
             XSLFPictureData pictureData = ppt.addPicture(picture, XSLFPictureData.PictureType.PNG);
             XSLFPictureShape pictureShape = currentSlide.createPicture(pictureData);
-            pictureShape.setAnchor(new Rectangle(SLIDE_WIDTH - SLIDE_PADDING - width, y, width, height));
+            pictureShape.setAnchor(new Rectangle(SLIDE_WIDTH - SLIDE_PADDING - width, y + 10, width, height));
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -395,8 +455,7 @@ public class NewPptCreator {
         drawLine(currentY);
     }
 
-    public void createTimeline(List<MilestoneDTO> milestones, IndicatorStatus status) {
-
+    public void createTimeline(List<MilestoneDTO> milestones, int overall) {
         drawLine(currentY);
         currentY += 10;
 
@@ -422,7 +481,7 @@ public class NewPptCreator {
             for (MilestoneDTO milestone : sortedMilestones) {
                 currentXPosition += step;
                 drawMilestoneIndicator(currentXPosition, y);
-                drawMilestoneHeader(currentXPosition - 35, y - 50, milestone.getLabel(), Utils.getMilestoneStatus(milestone));
+                drawMilestoneHeader(currentXPosition - 34, y - 50, milestone.getLabel(), milestone.getMeetingMinutes(), Utils.getMilestoneStatus(milestone));
                 drawMilestoneDates(currentXPosition - 50, y + 25, milestone.getActualDate(), milestone.getBaselineDate());
 
                 if (!curDayMilFound) {
@@ -439,6 +498,12 @@ public class NewPptCreator {
             }
         }
 
+        IndicatorStatus status;
+        try {
+            status = IndicatorStatus.getStatus(overall);
+        } catch (InvalidArgumentException e) {
+            status = IndicatorStatus.BLANK;
+        }
         drawTimelineStatusIndicator(timelineIndicatorX, y - 16, status);
         currentY += 175;
         drawTimelineExplanation(SLIDE_PADDING, currentY - 20);
@@ -481,7 +546,7 @@ public class NewPptCreator {
         rect.setLineColor(Color.black);
     }
 
-    private void drawMilestoneHeader(int x, int y, String label, MilestoneStatus status) {
+    private void drawMilestoneHeader(int x, int y, String label, String url, MilestoneStatus status) {
         currentBody = currentSlide.createTextBox();
         currentBody.setAnchor(new Rectangle(x, y, 70, 17));
 
@@ -491,17 +556,21 @@ public class NewPptCreator {
         createDefaultTextRun();
         currentTextRun.setText(label);
 
+        if (Utils.isUrl(url)) {
+            XSLFHyperlink link = currentTextRun.createHyperlink();
+            link.setAddress(url);
+        }
+
         try {
-            addMilestoneCompletion(x + 25, y - 25, status);
+            addMilestoneCompletion(x + 26, y - 25, status);
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
 
     private void drawMilestoneDates(int x, int y, Date actualDate, Date baselineDate) {
-        SimpleDateFormat formatter = new SimpleDateFormat("dd-MMM-yy", Locale.ENGLISH);
-        String actual = formatter.format(actualDate);
-        String baseline = formatter.format(baselineDate);
+        String actual = Utils.formatDate(actualDate);
+        String baseline = Utils.formatDate(baselineDate);
 
         currentBody = currentSlide.createTextBox();
         currentBody.setAnchor(new Rectangle(x, y, 100, 35));
