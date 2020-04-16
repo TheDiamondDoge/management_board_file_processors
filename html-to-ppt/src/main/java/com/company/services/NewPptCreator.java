@@ -44,6 +44,7 @@ public class NewPptCreator {
     private boolean footerNeeded = true;
     private int dynamicWorkingAreaHeight;
     private int currentWorkingAreaUsage = 0;
+    private int lastRowUsageByTextArea = 0;
 
     public NewPptCreator() {
         ppt = createPpt();
@@ -159,7 +160,8 @@ public class NewPptCreator {
         currentRowWidth += textWidth;
         if (currentRowWidth >= maxRowWidth) {
             int fullRows = (int) (Math.floor((double) currentRowWidth / (double) maxRowWidth));
-            currentWorkingAreaUsage += estimatedRowHeight * fullRows;
+            lastRowUsageByTextArea = estimatedRowHeight * fullRows;
+            currentWorkingAreaUsage += lastRowUsageByTextArea;
             currentRowWidth = currentRowWidth % maxRowWidth;
         }
     }
@@ -170,7 +172,7 @@ public class NewPptCreator {
 
     public void addNextSlide() {
         if (currentWorkingAreaUsage > dynamicWorkingAreaHeight) {
-            currentWorkingAreaUsage -= dynamicWorkingAreaHeight;
+            currentWorkingAreaUsage = lastRowUsageByTextArea;
             dynamicWorkingAreaHeight = 0;
         } else {
             currentWorkingAreaUsage = 0;
