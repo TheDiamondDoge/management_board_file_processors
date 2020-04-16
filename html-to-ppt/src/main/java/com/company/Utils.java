@@ -69,7 +69,7 @@ public class Utils {
             case GREEN:
                 return full ? "GREEN" : "G";
             default:
-                return "";
+                return " ";
 
         }
     }

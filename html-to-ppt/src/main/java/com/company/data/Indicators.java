@@ -1,6 +1,7 @@
 package com.company.data;
 
 public class Indicators {
+    private HealthIndicatorsPK healthIndicatorsPK;
     private int overall;
     private int schedule;
     private int scope;
@@ -16,6 +17,14 @@ public class Indicators {
         this.scope = scope;
         this.quality = quality;
         this.cost = cost;
+    }
+
+    public HealthIndicatorsPK getHealthIndicatorsPK() {
+        return healthIndicatorsPK;
+    }
+
+    public void setHealthIndicatorsPK(HealthIndicatorsPK healthIndicatorsPK) {
+        this.healthIndicatorsPK = healthIndicatorsPK;
     }
 
     public int getOverall() {

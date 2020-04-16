@@ -4,56 +4,56 @@ import java.util.List;
 
 public class Options {
     private ProjectGeneral generalInfo;
-    private Indicators indicators;
     private List<MilestoneDTO> milestones;
     private List<HtmlSection> titleWithHtmlSections;
     private List<Requirements> requirements;
+    private HealthIndicatorsDTO indicators;
 
-    public Options(ProjectGeneral generalInfo, Indicators indicators, List<MilestoneDTO> milestones, List<HtmlSection> titleWithHtmlSections, List<Requirements> requirements) {
-        this.generalInfo = generalInfo;
-        this.indicators = indicators;
-        this.milestones = milestones;
-        this.titleWithHtmlSections = titleWithHtmlSections;
-        this.requirements = requirements;
+    public Options() {
     }
 
     public ProjectGeneral getGeneralInfo() {
         return generalInfo;
     }
 
-    public void setGeneralInfo(ProjectGeneral generalInfo) {
+    public Options setGeneralInfo(ProjectGeneral generalInfo) {
         this.generalInfo = generalInfo;
-    }
-
-    public Indicators getIndicators() {
-        return indicators;
-    }
-
-    public void setIndicators(Indicators indicators) {
-        this.indicators = indicators;
+        return this;
     }
 
     public List<MilestoneDTO> getMilestones() {
         return milestones;
     }
 
-    public void setMilestones(List<MilestoneDTO> milestones) {
+    public Options setMilestones(List<MilestoneDTO> milestones) {
         this.milestones = milestones;
+        return this;
     }
 
     public List<HtmlSection> getTitleWithHtmlSections() {
         return titleWithHtmlSections;
     }
 
-    public void setTitleWithHtmlSections(List<HtmlSection> titleWithHtmlSections) {
+    public Options setTitleWithHtmlSections(List<HtmlSection> titleWithHtmlSections) {
         this.titleWithHtmlSections = titleWithHtmlSections;
+        return this;
     }
 
     public List<Requirements> getRequirements() {
         return requirements;
     }
 
-    public void setRequirements(List<Requirements> requirements) {
+    public Options setRequirements(List<Requirements> requirements) {
         this.requirements = requirements;
+        return this;
+    }
+
+    public HealthIndicatorsDTO getIndicators() {
+        return indicators;
+    }
+
+    public Options setIndicators(HealthIndicatorsDTO indicators) {
+        this.indicators = indicators;
+        return this;
     }
 }

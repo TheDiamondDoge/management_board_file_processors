@@ -1,10 +1,8 @@
 package com.company.services;
 
 import com.company.Utils;
-import com.company.data.Indicators;
-import com.company.data.MilestoneDTO;
-import com.company.data.ProjectGeneral;
-import com.company.data.Requirements;
+import com.company.data.*;
+import com.company.enums.HealthStatus;
 import com.company.enums.IndicatorStatus;
 import com.company.enums.MilestoneStatus;
 import com.sun.javaws.exceptions.InvalidArgumentException;
@@ -456,7 +454,7 @@ public class NewPptCreator {
     }
 
     public void createTimeline(List<MilestoneDTO> milestones, int overall) {
-        drawLine(currentY);
+//        drawLine(currentY);
         currentY += 10;
 
         int x = SLIDE_PADDING * 2;
@@ -609,6 +607,136 @@ public class NewPptCreator {
 
         createDefaultTextRun();
         currentTextRun.setText("Actual / Forecast");
+    }
+
+    public void drawIndicatorsTable(HealthIndicatorsDTO indicatorsDTO) {
+        XSLFTable table = currentSlide.createTable(6, 4);
+        table.setColumnWidth(0, 100);
+        table.setColumnWidth(1, 75);
+        table.setColumnWidth(2, 75);
+        table.setColumnWidth(3, SLIDE_WIDTH - 4 * SLIDE_PADDING - 250);
+
+        Date prev = indicatorsDTO.getPrevStatusSet();
+        Date curr = indicatorsDTO.getCurrentStatusSet();
+        String[] headerNames =
+                {"Status", "Previous " + Utils.formatDate(prev), "Current " + Utils.formatDate(curr), "Comment"};
+        String[] rowNames = {"", "Overall Project Status", "Schedule", "Scope", "Quality", "Cost"};
+
+        decorateIndicatorsHeaders(table);
+        setIndHeadersValues(table, headerNames, rowNames);
+        setIndTableValues(table, indicatorsDTO);
+
+        int width = SLIDE_WIDTH - 4 * SLIDE_PADDING;
+        int height = SLIDE_HEIGHT - 2 * SLIDE_PADDING - currentY;
+
+        table.setAnchor(new Rectangle(2 * SLIDE_PADDING, currentY + SLIDE_PADDING, width, height));
+    }
+
+    private void decorateIndicatorsHeaders(XSLFTable table) {
+        List<XSLFTableRow> rows = table.getRows();
+        //decorate table
+        for (int i = 0; i < rows.size(); i++) {
+            List<XSLFTableCell> cells = rows.get(i).getCells();
+            for (int j = 0; j < cells.size(); j++) {
+                XSLFTableCell currentCell = cells.get(j);
+                blackBorderedTableCellDecorator(currentCell);
+                currentCell.setVerticalAlignment(VerticalAlignment.MIDDLE);
+                if (i == 0 || j == 0) {
+                    currentCell.setFillColor(new Color(189, 223, 250));
+                } else {
+                    currentCell.setFillColor(new Color(242, 242, 242));
+                }
+            }
+        }
+    }
+
+    private void setIndHeadersValues(XSLFTable table, String[] headerNames, String[] rowsNames) {
+        List<XSLFTableRow> rows = table.getRows();
+        for (int i = 0; i < rows.size(); i++) {
+            List<XSLFTableCell> cells = rows.get(i).getCells();
+            for (int j = 0; j < cells.size(); j++) {
+                XSLFTableCell cell = cells.get(j);
+                if (i == 0) {
+                    currentParagraph = cell.addNewTextParagraph();
+                    currentParagraph.setTextAlign(TextParagraph.TextAlign.CENTER);
+                    createDefaultTextRun();
+                    currentTextRun.setText(headerNames[j]);
+                } else if (j == 0) {
+                    currentParagraph = cell.addNewTextParagraph();
+                    currentParagraph.setTextAlign(TextParagraph.TextAlign.CENTER);
+                    createDefaultTextRun();
+                    currentTextRun.setItalic(true);
+                    currentTextRun.setText(rowsNames[i]);
+                }
+            }
+        }
+    }
+
+    private void setIndTableValues(XSLFTable table, HealthIndicatorsDTO indicatorsDTO) {
+        Map<String, String> comments = indicatorsDTO.getComments();
+        HealthStatus[] statuses = {HealthStatus.OVERALL, HealthStatus.SCHEDULE, HealthStatus.SCOPE, HealthStatus.QUALITY, HealthStatus.COST};
+
+        List<XSLFTableRow> rows = table.getRows();
+        for (int i = 1; i < rows.size(); i++) {
+            List<XSLFTableCell> cells = rows.get(i).getCells();
+            for (int j = 1; j < 3; j++) {
+                currentParagraph = cells.get(j).addNewTextParagraph();
+                currentParagraph.setTextAlign(TextParagraph.TextAlign.CENTER);
+                createDefaultTextRun();
+                int indicatorValue = getIndValByRowCellIndexes(indicatorsDTO, i, j);
+                IndicatorStatus indicatorStatus;
+                try {
+                    indicatorStatus = IndicatorStatus.getStatus(indicatorValue);
+                } catch (InvalidArgumentException e) {
+                    indicatorStatus = IndicatorStatus.BLANK;
+                }
+                currentTextRun.setFontColor(Utils.getColorByIndStatus(indicatorStatus));
+                currentTextRun.setBold(true);
+                currentTextRun.setText(Utils.getSymbolByIndStatus(indicatorStatus));
+            }
+        }
+
+        for (int i = 1; i < rows.size(); i++) {
+            XSLFTableCell cell = rows.get(i).getCells().get(3);
+            cell.setVerticalAlignment(VerticalAlignment.MIDDLE);
+            currentParagraph = cell.addNewTextParagraph();
+            currentParagraph.setTextAlign(TextParagraph.TextAlign.CENTER);
+            createDefaultTextRun();
+            currentTextRun.setText(comments.get(statuses[i - 1].getLabel()));
+        }
+    }
+
+    private int getIndValByRowCellIndexes(HealthIndicatorsDTO indicatorsDTO, int rowInd, int cellInd) {
+        Indicators prev = indicatorsDTO.getStatuses().get(HealthStatus.PREVIOUS.getLabel());
+        Indicators curr = indicatorsDTO.getStatuses().get(HealthStatus.CURRENT.getLabel());
+        if (cellInd == 1) {
+            switch (rowInd) {
+                case 1:
+                    return prev.getOverall();
+                case 2:
+                    return prev.getSchedule();
+                case 3:
+                    return prev.getScope();
+                case 4:
+                    return prev.getQuality();
+                case 5:
+                    return prev.getCost();
+            }
+        } else if (cellInd == 2) {
+            switch (rowInd) {
+                case 1:
+                    return curr.getOverall();
+                case 2:
+                    return curr.getSchedule();
+                case 3:
+                    return curr.getScope();
+                case 4:
+                    return curr.getQuality();
+                case 5:
+                    return curr.getCost();
+            }
+        }
+        return 0;
     }
 
     public void save(String filepath) throws IOException {

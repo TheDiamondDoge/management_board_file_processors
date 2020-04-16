@@ -1,11 +1,11 @@
 package com.company;
 
 import com.company.data.*;
+import com.company.enums.HealthStatus;
+
 import java.io.IOException;
 import java.sql.Date;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
 
 public class Main {
 
@@ -16,9 +16,16 @@ public class Main {
         List<HtmlSection> sections = getSections();
         List<Requirements> requirements = getReqs();
 
-        Options options = new Options(general, indicators, milestones, sections, requirements);
+//        Options options = new Options(general, indicators, milestones, sections, requirements);
+        Options options = new Options()
+                .setGeneralInfo(general)
+                .setMilestones(milestones)
+                .setTitleWithHtmlSections(sections)
+                .setRequirements(requirements)
+                .setIndicators(getHealthIndicators());
         PptCreatorFacade facade = new PptCreatorFacade();
-        facade.createMultipageCustomizablePpt(options);
+//        facade.createMultipageCustomizablePpt(options);
+        facade.createMultipageIndicatorsPpt(options);
 }
 
     public static List<HtmlSection> getSections() {
@@ -72,5 +79,21 @@ public class Main {
         rqs.add(new Requirements("SuperId1", "Hreadline", "Done"));
         rqs.add(new Requirements("SuperId2222", "Hreadline", "Done"));
         return rqs;
+    }
+
+    public static HealthIndicatorsDTO getHealthIndicators() {
+        Indicators currInds = new Indicators(1, 3, 2, 3, 1);
+        currInds.setHealthIndicatorsPK(new HealthIndicatorsPK(0, new Date(1586934443000L)));
+        Indicators prevInds = new Indicators(3, 2, 1, 1, 3);
+        prevInds.setHealthIndicatorsPK(new HealthIndicatorsPK(0, new Date(1546934443000L)));
+
+        Map<String, String> comments = new HashMap<>();
+        comments.put(HealthStatus.OVERALL.getLabel(), "Overall comment");
+        comments.put(HealthStatus.COST.getLabel(), "Cost comment");
+        comments.put(HealthStatus.QUALITY.getLabel(), "Quality comment");
+        comments.put(HealthStatus.SCHEDULE.getLabel(), "Schedule comment");
+        comments.put(HealthStatus.SCOPE.getLabel(), "Scope comment");
+
+        return new HealthIndicatorsDTO(Arrays.asList(currInds, prevInds), comments);
     }
 }
