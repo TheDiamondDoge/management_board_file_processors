@@ -19,18 +19,16 @@ import java.awt.geom.AffineTransform;
 import java.io.*;
 import java.util.*;
 import java.util.List;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 public class NewPptCreator {
+    private final XMLSlideShow ppt;
     private final int SLIDE_WIDTH = 1280;
     private final int SLIDE_HEIGHT = 720;
     private final int FONT_SIZE = 14;
     private final String FONT_NAME = "Calibri";
     private final int SLIDE_PADDING = 20;
 
-    private XMLSlideShow ppt;
     private XSLFSlide currentSlide;
     private XSLFTextShape currentBody;
     private XSLFTextParagraph currentParagraph;
@@ -129,60 +127,13 @@ public class NewPptCreator {
     }
 
     public void decorateTextRun(Element e) {
-        String tag = e.tagName();
         String style = e.attr("style");
         String[] styleAttrs = style.split(";");
 
-        addDecorationByTag(currentTextRun, e);
+        Utils.addDecorationByTag(currentTextRun, e);
         for (String attr : styleAttrs) {
-            addDecorationByStyle(currentTextRun, attr);
+            Utils.addDecorationByStyle(currentTextRun, attr);
         }
-    }
-
-    private void addDecorationByTag(XSLFTextRun run, Element e) {
-        String tag = e.tagName();
-        switch (tag.toLowerCase()) {
-            case "u":
-                run.setUnderlined(true);
-                break;
-            case "strong":
-                run.setBold(true);
-                break;
-            case "s":
-                run.setStrikethrough(true);
-                break;
-            case "a":
-                String href = e.attr("href");
-                run.createHyperlink().setAddress(href);
-        }
-    }
-
-    private void addDecorationByStyle(XSLFTextRun run, String styleAttr) {
-        String[] parts = styleAttr.split(":");
-        switch (parts[0].toLowerCase()) {
-            case "color":
-                run.setFontColor(getColorFromRgbAttribute(parts[1]));
-                break;
-            case "background-color":
-                break;
-        }
-    }
-
-    private Color getColorFromRgbAttribute(String attr) {
-        Pattern pattern = Pattern.compile("rgb\\((\\d+), (\\d+), (\\d+)\\)");
-        Matcher matcher = pattern.matcher(attr);
-        try {
-            if (matcher.find()) {
-                int r = Integer.parseInt(matcher.group(1));
-                int g = Integer.parseInt(matcher.group(2));
-                int b = Integer.parseInt(matcher.group(3));
-                return new Color(r, g, b);
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
-        return Color.BLACK;
     }
 
     public void prepareDocForText(String text) {
@@ -306,70 +257,16 @@ public class NewPptCreator {
         XSLFTable table = currentSlide.createTable(2, 4);
         table.setAnchor(new Rectangle(SLIDE_WIDTH - SLIDE_PADDING - 400, SLIDE_PADDING, 350, 75));
 
+        PptElementsHelper helper = new PptElementsHelper();
         String[] labels = {"Schedule", "Scope", "Quality", "Cost"};
         for (int i = 0; i < labels.length; i++) {
             String label = labels[i];
             XSLFTableCell headerCell = table.getCell(0, i);
-            decorateThForIndicators(headerCell, label);
+            helper.decorateThForIndicators(headerCell, label);
 
             XSLFTableCell valueCell = table.getCell(1, i);
-            decorateTdForIndicators(valueCell, getIndicatorsStatus(indicators, label));
+            helper.decorateTdForIndicators(valueCell, Utils.getIndicatorsStatus(indicators, label));
         }
-    }
-
-    private IndicatorStatus getIndicatorsStatus(Indicators indicators, String label) {
-        if (Objects.isNull(indicators)) {
-            return IndicatorStatus.BLANK;
-        }
-        try {
-            switch (label.toLowerCase()) {
-                case "overall":
-                    return IndicatorStatus.getStatus(indicators.getOverall());
-                case "schedule":
-                    return IndicatorStatus.getStatus(indicators.getSchedule());
-                case "scope":
-                    return IndicatorStatus.getStatus(indicators.getScope());
-                case "quality":
-                    return IndicatorStatus.getStatus(indicators.getQuality());
-                case "cost":
-                    return IndicatorStatus.getStatus(indicators.getCost());
-            }
-        } catch (InvalidArgumentException e) {
-            e.printStackTrace();
-        }
-
-        return IndicatorStatus.BLANK;
-    }
-
-    private void decorateThForIndicators(XSLFTableCell cell, String value) {
-        XSLFTextParagraph paragraph = cell.addNewTextParagraph();
-        XSLFTextRun textRun = paragraph.addNewTextRun();
-        paragraph.setTextAlign(TextParagraph.TextAlign.CENTER);
-        textRun.setText(value);
-        textRun.setFontSize((double) FONT_SIZE);
-        blackBorderedTableCellDecorator(cell);
-    }
-
-    private void decorateTdForIndicators(XSLFTableCell cell, IndicatorStatus status) {
-        XSLFTextParagraph paragraph = cell.addNewTextParagraph();
-        XSLFTextRun textRun = paragraph.addNewTextRun();
-        paragraph.setTextAlign(TextParagraph.TextAlign.CENTER);
-        textRun.setText(Utils.getSymbolByIndStatus(status, true));
-        textRun.setFontSize((double) FONT_SIZE);
-        cell.setFillColor(Utils.getColorByIndStatus(status));
-        blackBorderedTableCellDecorator(cell);
-    }
-
-    private void blackBorderedTableCellDecorator(XSLFTableCell cell) {
-        cell.setBorderDash(TableCell.BorderEdge.bottom, StrokeStyle.LineDash.SOLID);
-        cell.setBorderDash(TableCell.BorderEdge.top, StrokeStyle.LineDash.SOLID);
-        cell.setBorderDash(TableCell.BorderEdge.left, StrokeStyle.LineDash.SOLID);
-        cell.setBorderDash(TableCell.BorderEdge.right, StrokeStyle.LineDash.SOLID);
-
-        cell.setBorderColor(TableCell.BorderEdge.bottom, Color.black);
-        cell.setBorderColor(TableCell.BorderEdge.top, Color.black);
-        cell.setBorderColor(TableCell.BorderEdge.left, Color.black);
-        cell.setBorderColor(TableCell.BorderEdge.right, Color.black);
     }
 
     public void setFooterNeeded(boolean footerNeeded) {
@@ -454,7 +351,6 @@ public class NewPptCreator {
     }
 
     public void createTimeline(List<MilestoneDTO> milestones, int overall) {
-//        drawLine(currentY);
         currentY += 10;
 
         int x = SLIDE_PADDING * 2;
@@ -465,7 +361,7 @@ public class NewPptCreator {
         drawTimeLine(x, y, width);
         drawTimelineLegend(x, y + 25);
 
-        boolean curDayMilFound = false;
+        boolean positionFound = false;
         int timelineIndicatorX = width / 2 + leftMargin;
         if (Objects.nonNull(milestones)) {
             List<MilestoneDTO> sortedMilestones = milestones.stream()
@@ -482,14 +378,15 @@ public class NewPptCreator {
                 drawMilestoneHeader(currentXPosition - 34, y - 50, milestone.getLabel(), milestone.getMeetingMinutes(), Utils.getMilestoneStatus(milestone));
                 drawMilestoneDates(currentXPosition - 50, y + 25, milestone.getActualDate(), milestone.getBaselineDate());
 
-                if (!curDayMilFound) {
+                if (!positionFound) {
                     int compareResult = Utils.compareWithToday(milestone.getActualDate());
                     if (compareResult != -1) {
                         if (compareResult == 0) {
                             timelineIndicatorX = currentXPosition - 8;
-                            curDayMilFound = true;
+                            positionFound = true;
                         } else if (compareResult == 1) {
                             timelineIndicatorX = currentXPosition - (step / 2) - 8;
+                            positionFound = true;
                         }
                     }
                 }
@@ -618,125 +515,17 @@ public class NewPptCreator {
 
         Date prev = indicatorsDTO.getPrevStatusSet();
         Date curr = indicatorsDTO.getCurrentStatusSet();
-        String[] headerNames =
-                {"Status", "Previous " + Utils.formatDate(prev), "Current " + Utils.formatDate(curr), "Comment"};
+        String[] headerNames = {"Status", "Previous " + Utils.formatDate(prev), "Current " + Utils.formatDate(curr), "Comment"};
         String[] rowNames = {"", "Overall Project Status", "Schedule", "Scope", "Quality", "Cost"};
 
-        decorateIndicatorsHeaders(table);
-        setIndHeadersValues(table, headerNames, rowNames);
-        setIndTableValues(table, indicatorsDTO);
+        PptElementsHelper helper = new PptElementsHelper();
+        helper.decorateIndicatorsHeaders(table);
+        helper.setIndHeadersValues(table, headerNames, rowNames);
+        helper.setIndTableValues(table, indicatorsDTO);
 
         int width = SLIDE_WIDTH - 4 * SLIDE_PADDING;
         int height = SLIDE_HEIGHT - 2 * SLIDE_PADDING - currentY;
-
         table.setAnchor(new Rectangle(2 * SLIDE_PADDING, currentY + SLIDE_PADDING, width, height));
-    }
-
-    private void decorateIndicatorsHeaders(XSLFTable table) {
-        List<XSLFTableRow> rows = table.getRows();
-        //decorate table
-        for (int i = 0; i < rows.size(); i++) {
-            List<XSLFTableCell> cells = rows.get(i).getCells();
-            for (int j = 0; j < cells.size(); j++) {
-                XSLFTableCell currentCell = cells.get(j);
-                blackBorderedTableCellDecorator(currentCell);
-                currentCell.setVerticalAlignment(VerticalAlignment.MIDDLE);
-                if (i == 0 || j == 0) {
-                    currentCell.setFillColor(new Color(189, 223, 250));
-                } else {
-                    currentCell.setFillColor(new Color(242, 242, 242));
-                }
-            }
-        }
-    }
-
-    private void setIndHeadersValues(XSLFTable table, String[] headerNames, String[] rowsNames) {
-        List<XSLFTableRow> rows = table.getRows();
-        for (int i = 0; i < rows.size(); i++) {
-            List<XSLFTableCell> cells = rows.get(i).getCells();
-            for (int j = 0; j < cells.size(); j++) {
-                XSLFTableCell cell = cells.get(j);
-                if (i == 0) {
-                    currentParagraph = cell.addNewTextParagraph();
-                    currentParagraph.setTextAlign(TextParagraph.TextAlign.CENTER);
-                    createDefaultTextRun();
-                    currentTextRun.setText(headerNames[j]);
-                } else if (j == 0) {
-                    currentParagraph = cell.addNewTextParagraph();
-                    currentParagraph.setTextAlign(TextParagraph.TextAlign.CENTER);
-                    createDefaultTextRun();
-                    currentTextRun.setItalic(true);
-                    currentTextRun.setText(rowsNames[i]);
-                }
-            }
-        }
-    }
-
-    private void setIndTableValues(XSLFTable table, HealthIndicatorsDTO indicatorsDTO) {
-        Map<String, String> comments = indicatorsDTO.getComments();
-        HealthStatus[] statuses = {HealthStatus.OVERALL, HealthStatus.SCHEDULE, HealthStatus.SCOPE, HealthStatus.QUALITY, HealthStatus.COST};
-
-        List<XSLFTableRow> rows = table.getRows();
-        for (int i = 1; i < rows.size(); i++) {
-            List<XSLFTableCell> cells = rows.get(i).getCells();
-            for (int j = 1; j < 3; j++) {
-                currentParagraph = cells.get(j).addNewTextParagraph();
-                currentParagraph.setTextAlign(TextParagraph.TextAlign.CENTER);
-                createDefaultTextRun();
-                int indicatorValue = getIndValByRowCellIndexes(indicatorsDTO, i, j);
-                IndicatorStatus indicatorStatus;
-                try {
-                    indicatorStatus = IndicatorStatus.getStatus(indicatorValue);
-                } catch (InvalidArgumentException e) {
-                    indicatorStatus = IndicatorStatus.BLANK;
-                }
-                currentTextRun.setFontColor(Utils.getColorByIndStatus(indicatorStatus));
-                currentTextRun.setBold(true);
-                currentTextRun.setText(Utils.getSymbolByIndStatus(indicatorStatus));
-            }
-        }
-
-        for (int i = 1; i < rows.size(); i++) {
-            XSLFTableCell cell = rows.get(i).getCells().get(3);
-            cell.setVerticalAlignment(VerticalAlignment.MIDDLE);
-            currentParagraph = cell.addNewTextParagraph();
-            currentParagraph.setTextAlign(TextParagraph.TextAlign.CENTER);
-            createDefaultTextRun();
-            currentTextRun.setText(comments.get(statuses[i - 1].getLabel()));
-        }
-    }
-
-    private int getIndValByRowCellIndexes(HealthIndicatorsDTO indicatorsDTO, int rowInd, int cellInd) {
-        Indicators prev = indicatorsDTO.getStatuses().get(HealthStatus.PREVIOUS.getLabel());
-        Indicators curr = indicatorsDTO.getStatuses().get(HealthStatus.CURRENT.getLabel());
-        if (cellInd == 1) {
-            switch (rowInd) {
-                case 1:
-                    return prev.getOverall();
-                case 2:
-                    return prev.getSchedule();
-                case 3:
-                    return prev.getScope();
-                case 4:
-                    return prev.getQuality();
-                case 5:
-                    return prev.getCost();
-            }
-        } else if (cellInd == 2) {
-            switch (rowInd) {
-                case 1:
-                    return curr.getOverall();
-                case 2:
-                    return curr.getSchedule();
-                case 3:
-                    return curr.getScope();
-                case 4:
-                    return curr.getQuality();
-                case 5:
-                    return curr.getCost();
-            }
-        }
-        return 0;
     }
 
     public void save(String filepath) throws IOException {

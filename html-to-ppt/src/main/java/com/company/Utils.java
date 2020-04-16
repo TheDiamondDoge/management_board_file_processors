@@ -1,14 +1,21 @@
 package com.company;
 
+import com.company.data.Indicators;
 import com.company.data.MilestoneDTO;
 import com.company.enums.IndicatorStatus;
 import com.company.enums.MilestoneStatus;
+import com.sun.javaws.exceptions.InvalidArgumentException;
+import org.apache.poi.xslf.usermodel.XSLFTextRun;
+import org.jsoup.nodes.Element;
 
 import java.awt.*;
 import java.sql.Date;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Locale;
+import java.util.Objects;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class Utils {
     public static MilestoneStatus getMilestoneStatus(MilestoneDTO milestone) {
@@ -72,6 +79,76 @@ public class Utils {
                 return " ";
 
         }
+    }
+
+    public static void addDecorationByTag(XSLFTextRun run, Element e) {
+        String tag = e.tagName();
+        switch (tag.toLowerCase()) {
+            case "u":
+                run.setUnderlined(true);
+                break;
+            case "strong":
+                run.setBold(true);
+                break;
+            case "s":
+                run.setStrikethrough(true);
+                break;
+            case "a":
+                String href = e.attr("href");
+                run.createHyperlink().setAddress(href);
+        }
+    }
+
+    public static void addDecorationByStyle(XSLFTextRun run, String styleAttr) {
+        String[] parts = styleAttr.split(":");
+        switch (parts[0].toLowerCase()) {
+            case "color":
+                run.setFontColor(getColorFromRgbAttribute(parts[1]));
+                break;
+            case "background-color":
+                break;
+        }
+    }
+
+    public static Color getColorFromRgbAttribute(String attr) {
+        Pattern pattern = Pattern.compile("rgb\\((\\d+), (\\d+), (\\d+)\\)");
+        Matcher matcher = pattern.matcher(attr);
+        try {
+            if (matcher.find()) {
+                int r = Integer.parseInt(matcher.group(1));
+                int g = Integer.parseInt(matcher.group(2));
+                int b = Integer.parseInt(matcher.group(3));
+                return new Color(r, g, b);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return Color.BLACK;
+    }
+
+    public static IndicatorStatus getIndicatorsStatus(Indicators indicators, String label) {
+        if (Objects.isNull(indicators)) {
+            return IndicatorStatus.BLANK;
+        }
+        try {
+            switch (label.toLowerCase()) {
+                case "overall":
+                    return IndicatorStatus.getStatus(indicators.getOverall());
+                case "schedule":
+                    return IndicatorStatus.getStatus(indicators.getSchedule());
+                case "scope":
+                    return IndicatorStatus.getStatus(indicators.getScope());
+                case "quality":
+                    return IndicatorStatus.getStatus(indicators.getQuality());
+                case "cost":
+                    return IndicatorStatus.getStatus(indicators.getCost());
+            }
+        } catch (InvalidArgumentException e) {
+            e.printStackTrace();
+        }
+
+        return IndicatorStatus.BLANK;
     }
 
     public static boolean isUrl(String url) {
