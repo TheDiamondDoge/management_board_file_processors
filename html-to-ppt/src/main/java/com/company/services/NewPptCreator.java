@@ -2,7 +2,6 @@ package com.company.services;
 
 import com.company.Utils;
 import com.company.data.*;
-import com.company.enums.HealthStatus;
 import com.company.enums.IndicatorStatus;
 import com.company.enums.MilestoneStatus;
 import com.sun.javaws.exceptions.InvalidArgumentException;
@@ -10,8 +9,6 @@ import org.apache.poi.sl.usermodel.*;
 import org.apache.poi.util.IOUtils;
 import org.apache.poi.xslf.usermodel.*;
 import org.jsoup.nodes.Element;
-import org.jsoup.nodes.Node;
-import org.jsoup.nodes.TextNode;
 
 import java.awt.*;
 import java.awt.font.FontRenderContext;
@@ -220,7 +217,7 @@ public class NewPptCreator {
 
     public void addRisksToSlide(Map<String, List<Risk>> risks) {
         String[] sectionsOrder = {"high", "moderate", "low"};
-        Color[] sectionColors = {Color.red, Color.yellow, Color.green};
+        Color[] sectionColors = {Color.red, Color.orange, Color.green};
         Map<String, String> sectionToLabel = new HashMap<>();
         sectionToLabel.put("high", "High Risks");
         sectionToLabel.put("moderate", "Moderate Risks");

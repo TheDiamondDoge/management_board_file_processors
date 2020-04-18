@@ -54,7 +54,7 @@ public class Utils {
             case RED:
                 return Color.RED;
             case YELLOW:
-                return Color.YELLOW;
+                return Color.ORANGE;
             case GREEN:
                 return Color.GREEN;
             case BLANK:

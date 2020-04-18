@@ -78,7 +78,7 @@ public class Main {
         String redFlagTitle = "<span style='color: rgb(255, 0, 0)'>Red Flag</span>";
         String redFlagHtml = "<p><span style=\"color: rgb(0, 255, 0);\"><u><strong>That`s all, folks!</strong></u></span></p>";
 
-        String yellowFlagTitle = "<span style='color: rgb(255, 255, 0)'>Yellow Flag</span>";
+        String yellowFlagTitle = "<span style='color: rgb(255, 165, 0)'>Yellow Flag</span>";
         String yellowFlagHtml = "<p><span style=\"color: rgb(0, 255, 0);\"><u><strong>That`s all, folks!</strong></u></span></p>";
 
         String greenFlagTitle = "<span style='color: rgb(0, 255, 0)'>Green Flag</span>";
