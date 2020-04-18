@@ -69,16 +69,41 @@ public class NewPptCreator {
     }
 
     public void createNewSlide() {
+        createNewSlide(true);
+    }
+
+    private void createNewSlide(boolean isNewSection) {
         XSLFSlideMaster slideMaster = ppt.getSlideMasters().get(0);
         XSLFSlideLayout layout = slideMaster.getLayout(SlideLayout.BLANK);
         currentSlide = ppt.createSlide(layout);
         currentY = SLIDE_PADDING;
+
+        if (isNewSection) {
+            currentWorkingAreaUsage = 0;
+        }
+
         createHeader();
         addRowsToOccupiedHeight(1);
         createSlideName();
         if (footerNeeded) {
             createFooter();
         }
+    }
+
+    public void addNextSlide() {
+        currentY = 0;
+        createNewSlide(false);
+
+        if (currentWorkingAreaUsage > dynamicWorkingAreaHeight) {
+            currentWorkingAreaUsage = lastRowUsageByTextArea;
+            dynamicWorkingAreaHeight = 0;
+        } else {
+            currentWorkingAreaUsage = 0;
+            currentRowWidth = 0;
+        }
+
+        addTextWorkingArea();
+        currentParagraph = currentBody.getTextParagraphs().get(0);
     }
 
     public void addTextWorkingArea() {
@@ -146,9 +171,8 @@ public class NewPptCreator {
         createDefaultTextRun();
     }
 
-    public void addNodeToSlide(Node node) {
-        TextNode textNode = (TextNode) node;
-        currentTextRun.setText(textNode.text());
+    public void addNodeToSlide(String text) {
+        currentTextRun.setText(text);
     }
 
     private void increaseCharsAmount(String text) {
@@ -170,38 +194,93 @@ public class NewPptCreator {
         return currentWorkingAreaUsage > dynamicWorkingAreaHeight;
     }
 
-    public void addNextSlide() {
-        if (currentWorkingAreaUsage > dynamicWorkingAreaHeight) {
-            currentWorkingAreaUsage = lastRowUsageByTextArea;
-            dynamicWorkingAreaHeight = 0;
-        } else {
-            currentWorkingAreaUsage = 0;
-            currentRowWidth = 0;
-        }
-
-        currentY = 0;
-        createNewSlide();
-        addTextWorkingArea();
-        currentParagraph = currentBody.getTextParagraphs().get(0);
-    }
-
     public void addRequirementsToSlide(List<Requirements> requirements) {
         for (Requirements rq : requirements) {
             createNewParagraph(true);
-            createDefaultTextRun();
+            String reqId = rq.getReqId() + ": ";
+            prepareDocForText(reqId);
             currentTextRun.setBold(true);
             currentTextRun.setUnderlined(true);
-            currentTextRun.setText(rq.getReqId() + ": ");
+            currentTextRun.setText(reqId);
 
-            createDefaultTextRun();
-            currentTextRun.setText(rq.getHeadline());
+            String headline = rq.getHeadline();
+            prepareDocForText(headline);
+            currentTextRun.setText(headline);
 
-            createDefaultTextRun();
+            String statusPrefix = " Status: ";
+            prepareDocForText(statusPrefix);
             currentTextRun.setUnderlined(true);
-            currentTextRun.setText(" Status: ");
+            currentTextRun.setText(statusPrefix);
 
-            createDefaultTextRun();
-            currentTextRun.setText(rq.getStatus());
+            String status = rq.getStatus();
+            prepareDocForText(status);
+            currentTextRun.setText(status);
+        }
+    }
+
+    public void addRisksToSlide(Map<String, List<Risk>> risks) {
+        String[] sectionsOrder = {"high", "moderate", "low"};
+        Color[] sectionColors = {Color.red, Color.yellow, Color.green};
+        Map<String, String> sectionToLabel = new HashMap<>();
+        sectionToLabel.put("high", "High Risks");
+        sectionToLabel.put("moderate", "Moderate Risks");
+        sectionToLabel.put("low", "Low Risks");
+
+        for (int i = 0; i < sectionsOrder.length; i++) {
+            String section = sectionsOrder[i];
+            Color color = sectionColors[i];
+            List<Risk> sectionRisks = risks.get(section);
+            if (Objects.nonNull(sectionRisks)) {
+                createNewParagraph(false);
+                createDefaultTextRun();
+                currentTextRun.setBold(true);
+                currentTextRun.setUnderlined(true);
+                currentTextRun.setFontColor(color);
+                currentTextRun.setText(sectionToLabel.get(section));
+                addRisks(sectionRisks);
+            }
+
+            addLineBreak();
+        }
+    }
+
+    private void addLineBreak() {
+        currentParagraph.addLineBreak();
+        currentWorkingAreaUsage += 17;
+    }
+
+    private void addRisks(List<Risk> risks) {
+        for (Risk risk : risks) {
+            createNewParagraph(true);
+            currentParagraph.setIndentLevel(1);
+
+            String titlePrefix = "Risk: ";
+            prepareDocForText(titlePrefix);
+            currentTextRun.setBold(true);
+            currentTextRun.setText(titlePrefix);
+
+            prepareDocForText(risk.getRiskDescription());
+            currentTextRun.setText(risk.getRiskDescription());
+
+            addLineBreak();
+
+            String descrPrefix = "Description: ";
+            prepareDocForText(descrPrefix);
+            currentTextRun.setUnderlined(true);
+            currentTextRun.setText(descrPrefix);
+
+            prepareDocForText(risk.getImpactDescription());
+            currentTextRun.setText(risk.getImpactDescription());
+
+            addLineBreak();
+
+            String mitigPrefix = "Mitigation Plan: ";
+            prepareDocForText(mitigPrefix);
+            currentTextRun.setUnderlined(true);
+            currentTextRun.setText(mitigPrefix);
+
+            prepareDocForText(risk.getMitigation());
+            currentTextRun.setText(risk.getMitigation());
         }
     }
 

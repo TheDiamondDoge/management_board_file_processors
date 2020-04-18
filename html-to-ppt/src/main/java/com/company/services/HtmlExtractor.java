@@ -46,7 +46,7 @@ public class HtmlExtractor {
                 TextNode tNode = (TextNode) node;
                 pptCreator.prepareDocForText(tNode.text());
                 elements.forEach(elem -> pptCreator.decorateTextRun(elem));
-                pptCreator.addNodeToSlide(node);
+                pptCreator.addNodeToSlide(tNode.text());
             } else if (isElementNode(node)){
                 Element elementNode = (Element) node;
                 elements.push(elementNode);
