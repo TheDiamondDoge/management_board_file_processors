@@ -39,6 +39,27 @@ public class PptCreatorFacadeTest {
         facade.createExecReviewPpt(options, "createExecReviewPpt.pptx");
     }
 
+    @Test
+    public void createMultipageCustomizablePptWithAllNulls() throws IOException {
+        PptCreatorFacade facade = new PptCreatorFacade();
+        Options options = getOptionsWithAllNulls();
+        facade.createMultipageCustomizablePpt(options, "createMultipageCustomizablePptWithAllNulls.pptx");
+    }
+
+    @Test
+    public void createMultipageIndicatorsPptWithAllNulls() throws IOException {
+        PptCreatorFacade facade = new PptCreatorFacade();
+        Options options = getOptionsWithAllNulls();
+        facade.createMultipageIndicatorsPpt(options, "createMultipageIndicatorsPptWithAllNulls.pptx");
+    }
+
+    @Test
+    public void createExecReviewPptWithAllNulls() throws IOException {
+        PptCreatorFacade facade = new PptCreatorFacade();
+        Options options = getOptionsWithAllNulls();
+        facade.createExecReviewPpt(options, "createExecReviewPptWithAllNulls.pptx");
+    }
+
     private static Options getOptions() {
         TestDataInit dataInit = new TestDataInit();
         ProjectGeneral general = new ProjectGeneral("Project from Facade", "IKSANOV Aleksandr", "http://ya.ru", new java.util.Date());
@@ -49,14 +70,17 @@ public class PptCreatorFacadeTest {
         Map<String, List<Risk>> risks = dataInit.getRisks();
         HealthIndicatorsDTO healthIndicators = dataInit.getHealthIndicators();
 
-//        return new Options()
-//                .setGeneralInfo(general)
-//                .setMilestones(milestones)
-//                .setExecutiveSummary(execSummary)
-//                .setRequirements(requirements)
-//                .setIndicators(healthIndicators)
-//                .setRisks(risks)
-//                .setOtherInformation(otherInformation);
+        return new Options()
+                .setGeneralInfo(general)
+                .setMilestones(milestones)
+                .setExecutiveSummary(execSummary)
+                .setRequirements(requirements)
+                .setIndicators(healthIndicators)
+                .setRisks(risks)
+                .setOtherInformation(otherInformation);
+    }
+
+    private static Options getOptionsWithAllNulls() {
         return new Options()
                 .setGeneralInfo(null)
                 .setMilestones(null)

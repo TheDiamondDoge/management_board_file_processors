@@ -12,7 +12,6 @@ import java.util.Objects;
 public class PptCreatorFacade {
     public String createMultipageCustomizablePpt(Options options, String filepath) throws IOException {
         ProjectGeneral generalInfo = options.getGeneralInfo();
-        HealthIndicatorsDTO indicatorsDTO = options.getIndicators();
         List<MilestoneDTO> milestones = options.getMilestones();
         List<HtmlSection> executiveSummary = options.getExecutiveSummary();
         List<Requirements> requirements = options.getRequirements();
@@ -38,29 +37,37 @@ public class PptCreatorFacade {
         pptCreator.createIndicatorsTable(indicators);
         pptCreator.createTimeline(milestones, indicators.getOverall());
         pptCreator.addTextWorkingArea();
+        HtmlExtractor htmlExtractor = new HtmlExtractor(pptCreator);
 
         //executive summary section (with flags)
-        String summarySection = createOneSection(executiveSummary, true);
-        HtmlExtractor htmlExtractor = new HtmlExtractor(pptCreator);
-        htmlExtractor.extract(summarySection);
+        if (Objects.nonNull(executiveSummary)) {
+            String summarySection = createOneSection(executiveSummary, true);
+            htmlExtractor.extract(summarySection);
+        }
 
         //risks section
-        pptCreator.setCurrentSectionName("Risks");
-        pptCreator.createNewSlide();
-        pptCreator.addTextWorkingArea();
-        pptCreator.addRisksToSlide(risks);
+        if (Objects.nonNull(risks)) {
+            pptCreator.setCurrentSectionName("Risks");
+            pptCreator.createNewSlide();
+            pptCreator.addTextWorkingArea();
+            pptCreator.addRisksToSlide(risks);
+        }
 
         //rqs from jira
-        pptCreator.setCurrentSectionName("Scope Definition");
-        pptCreator.createNewSlide();
-        pptCreator.addTextWorkingArea();
-        pptCreator.addRequirementsToSlide(requirements);
+        if (Objects.nonNull(requirements)) {
+            pptCreator.setCurrentSectionName("Scope Definition");
+            pptCreator.createNewSlide();
+            pptCreator.addTextWorkingArea();
+            pptCreator.addRequirementsToSlide(requirements);
+        }
 
         //current project details section
-        pptCreator.setCurrentSectionName("Other Information");
-        pptCreator.createNewSlide();
-        pptCreator.addTextWorkingArea();
-        htmlExtractor.extract(createOneSection(otherInformation, false));
+        if (Objects.nonNull(otherInformation)) {
+            pptCreator.setCurrentSectionName("Other Information");
+            pptCreator.createNewSlide();
+            pptCreator.addTextWorkingArea();
+            htmlExtractor.extract(createOneSection(otherInformation, false));
+        }
 
         return pptCreator.save(filepath);
     }
@@ -97,31 +104,37 @@ public class PptCreatorFacade {
         pptCreator.createIndicatorsTable(indicators);
         pptCreator.createTimeline(milestones, indicators.getOverall());
         pptCreator.drawIndicatorsTable(indicatorsDTO);
+        HtmlExtractor htmlExtractor = new HtmlExtractor(pptCreator);
 
         //executive summary section (with flags)
-        pptCreator.createNewSlide();
-        pptCreator.addTextWorkingArea();
-        String summarySection = createOneSection(executiveSummary, true);
-        HtmlExtractor htmlExtractor = new HtmlExtractor(pptCreator);
-        htmlExtractor.extract(summarySection);
+        if (Objects.nonNull(executiveSummary)) {
+            String summarySection = createOneSection(executiveSummary, true);
+            htmlExtractor.extract(summarySection);
+        }
 
         //risks section
-        pptCreator.setCurrentSectionName("Risks");
-        pptCreator.createNewSlide();
-        pptCreator.addTextWorkingArea();
-        pptCreator.addRisksToSlide(risks);
+        if (Objects.nonNull(risks)) {
+            pptCreator.setCurrentSectionName("Risks");
+            pptCreator.createNewSlide();
+            pptCreator.addTextWorkingArea();
+            pptCreator.addRisksToSlide(risks);
+        }
 
         //rqs from jira
-        pptCreator.setCurrentSectionName("Scope Definition");
-        pptCreator.createNewSlide();
-        pptCreator.addTextWorkingArea();
-        pptCreator.addRequirementsToSlide(requirements);
+        if (Objects.nonNull(requirements)) {
+            pptCreator.setCurrentSectionName("Scope Definition");
+            pptCreator.createNewSlide();
+            pptCreator.addTextWorkingArea();
+            pptCreator.addRequirementsToSlide(requirements);
+        }
 
         //current project details section
-        pptCreator.setCurrentSectionName("Other Information");
-        pptCreator.createNewSlide();
-        pptCreator.addTextWorkingArea();
-        htmlExtractor.extract(createOneSection(otherInformation, false));
+        if (Objects.nonNull(otherInformation)) {
+            pptCreator.setCurrentSectionName("Other Information");
+            pptCreator.createNewSlide();
+            pptCreator.addTextWorkingArea();
+            htmlExtractor.extract(createOneSection(otherInformation, false));
+        }
 
         return pptCreator.save(out);
     }
@@ -131,10 +144,6 @@ public class PptCreatorFacade {
     }
 
     private String createOneSection(List<HtmlSection> sections, boolean ignoreFirstTitle) {
-        if (Objects.isNull(sections)) {
-            return "";
-        }
-
         StringBuilder result = new StringBuilder();
         result.append("<p>");
         for (int i = 0; i < sections.size(); i++) {
