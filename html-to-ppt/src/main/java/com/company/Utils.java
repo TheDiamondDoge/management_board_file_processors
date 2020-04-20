@@ -156,6 +156,7 @@ public class Utils {
     }
 
     public static String formatDate(java.util.Date date) {
+        if (Objects.isNull(date)) return "";
         SimpleDateFormat formatter = new SimpleDateFormat("dd-MMM-yy", Locale.ENGLISH);
         return formatter.format(date);
     }

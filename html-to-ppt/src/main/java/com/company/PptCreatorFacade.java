@@ -7,22 +7,33 @@ import com.company.services.NewPptCreator;
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 public class PptCreatorFacade {
-    public void createMultipageCustomizablePpt(Options options) throws IOException {
+    public String createMultipageCustomizablePpt(Options options, String filepath) throws IOException {
         ProjectGeneral generalInfo = options.getGeneralInfo();
-        Indicators indicators = options.getIndicators().getStatuses().get("current");
+        HealthIndicatorsDTO indicatorsDTO = options.getIndicators();
         List<MilestoneDTO> milestones = options.getMilestones();
         List<HtmlSection> executiveSummary = options.getExecutiveSummary();
         List<Requirements> requirements = options.getRequirements();
         Map<String, List<Risk>> risks = options.getRisks();
         List<HtmlSection> otherInformation = options.getOtherInformation();
+        Indicators indicators;
+        try {
+            indicators = options.getIndicators().getStatuses().get("current");
+        } catch (NullPointerException e) {
+            indicators = new Indicators();
+        }
 
         //init
         NewPptCreator pptCreator = new NewPptCreator();
         pptCreator.setFooterNeeded(true);
         pptCreator.setProjectInfo(generalInfo);
-        pptCreator.setCurrentSectionName(executiveSummary.get(0).getTitle());
+        String title = "";
+        if (Objects.nonNull(executiveSummary) && executiveSummary.size() != 0) {
+            title = executiveSummary.get(0).getTitle();
+        }
+        pptCreator.setCurrentSectionName(title);
         pptCreator.createNewSlide();
         pptCreator.createIndicatorsTable(indicators);
         pptCreator.createTimeline(milestones, indicators.getOverall());
@@ -51,28 +62,37 @@ public class PptCreatorFacade {
         pptCreator.addTextWorkingArea();
         htmlExtractor.extract(createOneSection(otherInformation, false));
 
-        pptCreator.save("createMultipageCustomizablePpt.pptx");
+        return pptCreator.save(filepath);
     }
 
-    public void createMultipageIndicatorsPpt(Options options) throws IOException {
-        createMultipageIndicatorsPpt(options, "createMultipageIndicatorsPpt.pptx", true);
+    public String createMultipageIndicatorsPpt(Options options, String filepath) throws IOException {
+        return createMultipageIndicatorsPpt(options, filepath, true);
     }
 
-    private void createMultipageIndicatorsPpt(Options options, String out, boolean footer) throws IOException {
+    private String createMultipageIndicatorsPpt(Options options, String out, boolean footer) throws IOException {
         ProjectGeneral generalInfo = options.getGeneralInfo();
-        Indicators indicators = options.getIndicators().getStatuses().get("current");
         HealthIndicatorsDTO indicatorsDTO = options.getIndicators();
         List<MilestoneDTO> milestones = options.getMilestones();
         List<HtmlSection> executiveSummary = options.getExecutiveSummary();
         List<Requirements> requirements = options.getRequirements();
         Map<String, List<Risk>> risks = options.getRisks();
         List<HtmlSection> otherInformation = options.getOtherInformation();
+        Indicators indicators;
+        try {
+            indicators = options.getIndicators().getStatuses().get("current");
+        } catch (NullPointerException e) {
+            indicators = new Indicators();
+        }
 
         //init
         NewPptCreator pptCreator = new NewPptCreator();
         pptCreator.setFooterNeeded(footer);
         pptCreator.setProjectInfo(generalInfo);
-        pptCreator.setCurrentSectionName(executiveSummary.get(0).getTitle());
+        String title = "";
+        if (Objects.nonNull(executiveSummary) && executiveSummary.size() != 0) {
+            title = executiveSummary.get(0).getTitle();
+        }
+        pptCreator.setCurrentSectionName(title);
         pptCreator.createNewSlide();
         pptCreator.createIndicatorsTable(indicators);
         pptCreator.createTimeline(milestones, indicators.getOverall());
@@ -103,14 +123,18 @@ public class PptCreatorFacade {
         pptCreator.addTextWorkingArea();
         htmlExtractor.extract(createOneSection(otherInformation, false));
 
-        pptCreator.save(out);
+        return pptCreator.save(out);
     }
 
-    public void createExecReviewPpt(Options options) throws IOException {
-        createMultipageIndicatorsPpt(options, "createExecReviewPpt.pptx", false);
+    public String createExecReviewPpt(Options options, String filepath) throws IOException {
+        return createMultipageIndicatorsPpt(options, filepath, false);
     }
 
     private String createOneSection(List<HtmlSection> sections, boolean ignoreFirstTitle) {
+        if (Objects.isNull(sections)) {
+            return "";
+        }
+
         StringBuilder result = new StringBuilder();
         result.append("<p>");
         for (int i = 0; i < sections.size(); i++) {

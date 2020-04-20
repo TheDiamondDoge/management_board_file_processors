@@ -192,6 +192,10 @@ public class NewPptCreator {
     }
 
     public void addRequirementsToSlide(List<Requirements> requirements) {
+        if (Objects.isNull(requirements)) {
+            return;
+        }
+
         for (Requirements rq : requirements) {
             createNewParagraph(true);
             String reqId = rq.getReqId() + ": ";
@@ -216,6 +220,10 @@ public class NewPptCreator {
     }
 
     public void addRisksToSlide(Map<String, List<Risk>> risks) {
+        if (Objects.isNull(risks)) {
+            return;
+        }
+
         String[] sectionsOrder = {"high", "moderate", "low"};
         Color[] sectionColors = {Color.red, Color.orange, Color.green};
         Map<String, String> sectionToLabel = new HashMap<>();
@@ -227,7 +235,7 @@ public class NewPptCreator {
             String section = sectionsOrder[i];
             Color color = sectionColors[i];
             List<Risk> sectionRisks = risks.get(section);
-            if (Objects.nonNull(sectionRisks)) {
+            if (Objects.nonNull(sectionRisks) && sectionRisks.size() > 0) {
                 createNewParagraph(false);
                 createDefaultTextRun();
                 currentTextRun.setBold(true);
@@ -585,6 +593,10 @@ public class NewPptCreator {
     }
 
     public void drawIndicatorsTable(HealthIndicatorsDTO indicatorsDTO) {
+        if (Objects.isNull(indicatorsDTO)) {
+            indicatorsDTO = new HealthIndicatorsDTO();
+        }
+
         XSLFTable table = currentSlide.createTable(6, 4);
         table.setColumnWidth(0, 100);
         table.setColumnWidth(1, 75);
@@ -606,10 +618,12 @@ public class NewPptCreator {
         table.setAnchor(new Rectangle(2 * SLIDE_PADDING, currentY + SLIDE_PADDING, width, height));
     }
 
-    public void save(String filepath) throws IOException {
+    public String save(String filepath) throws IOException {
         File file = new File(filepath);
         FileOutputStream out = new FileOutputStream(file);
         ppt.write(out);
         out.close();
+
+        return file.getAbsolutePath();
     }
 }

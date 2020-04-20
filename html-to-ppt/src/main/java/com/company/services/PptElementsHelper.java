@@ -94,13 +94,23 @@ public class PptElementsHelper {
             currentParagraph.setTextAlign(TextParagraph.TextAlign.CENTER);
             XSLFTextRun currentTextRun = currentParagraph.addNewTextRun();
             decorateDefaultTextRun(currentTextRun);
-            currentTextRun.setText(comments.get(statuses[i - 1].getLabel()));
+            try {
+                currentTextRun.setText(comments.get(statuses[i - 1].getLabel()));
+            } catch (Exception e) {
+                currentTextRun.setText("");
+            }
         }
     }
 
     public int getIndValByRowCellIndexes(HealthIndicatorsDTO indicatorsDTO, int rowInd, int cellInd) {
-        Indicators prev = indicatorsDTO.getStatuses().get(HealthStatus.PREVIOUS.getLabel());
-        Indicators curr = indicatorsDTO.getStatuses().get(HealthStatus.CURRENT.getLabel());
+        Indicators prev, curr;
+        try {
+            prev = indicatorsDTO.getStatuses().get(HealthStatus.PREVIOUS.getLabel());
+            curr = indicatorsDTO.getStatuses().get(HealthStatus.CURRENT.getLabel());
+        } catch (NullPointerException e) {
+            return 0;
+        }
+
         if (cellInd == 1) {
             switch (rowInd) {
                 case 1:
