@@ -151,6 +151,7 @@ public class Utils {
         return IndicatorStatus.BLANK;
     }
 
+    //TODO: replace with something serious
     public static boolean isUrl(String url) {
         return url.startsWith("http://") || url.startsWith("https://");
     }
