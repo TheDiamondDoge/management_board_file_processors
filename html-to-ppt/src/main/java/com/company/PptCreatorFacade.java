@@ -55,6 +55,10 @@ public class PptCreatorFacade {
     }
 
     public void createMultipageIndicatorsPpt(Options options) throws IOException {
+        createMultipageIndicatorsPpt(options, "createMultipageIndicatorsPpt.pptx", true);
+    }
+
+    private void createMultipageIndicatorsPpt(Options options, String out, boolean footer) throws IOException {
         ProjectGeneral generalInfo = options.getGeneralInfo();
         Indicators indicators = options.getIndicators().getStatuses().get("current");
         HealthIndicatorsDTO indicatorsDTO = options.getIndicators();
@@ -66,7 +70,7 @@ public class PptCreatorFacade {
 
         //init
         NewPptCreator pptCreator = new NewPptCreator();
-        pptCreator.setFooterNeeded(true);
+        pptCreator.setFooterNeeded(footer);
         pptCreator.setProjectInfo(generalInfo);
         pptCreator.setCurrentSectionName(executiveSummary.get(0).getTitle());
         pptCreator.createNewSlide();
@@ -99,11 +103,11 @@ public class PptCreatorFacade {
         pptCreator.addTextWorkingArea();
         htmlExtractor.extract(createOneSection(otherInformation, false));
 
-        pptCreator.save("createMultipageIndicatorsPpt.pptx");
+        pptCreator.save(out);
     }
 
-    public void createExecReviewPpt() {
-
+    public void createExecReviewPpt(Options options) throws IOException {
+        createMultipageIndicatorsPpt(options, "createExecReviewPpt.pptx", false);
     }
 
     private String createOneSection(List<HtmlSection> sections, boolean ignoreFirstTitle) {

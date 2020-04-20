@@ -27,8 +27,9 @@ public class Main {
                 .setOtherInformation(otherInformation);
 
         PptCreatorFacade facade = new PptCreatorFacade();
-        facade.createMultipageCustomizablePpt(options);
+//        facade.createMultipageCustomizablePpt(options);
 //        facade.createMultipageIndicatorsPpt(options);
+        facade.createExecReviewPpt(options);
 }
 
     public static List<HtmlSection> getOtherInformation() {
