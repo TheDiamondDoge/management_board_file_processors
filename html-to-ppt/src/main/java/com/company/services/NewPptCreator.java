@@ -5,6 +5,7 @@ import com.company.data.*;
 import com.company.enums.IndicatorStatus;
 import com.company.enums.MilestoneStatus;
 import com.sun.javaws.exceptions.InvalidArgumentException;
+import org.apache.commons.validator.routines.UrlValidator;
 import org.apache.poi.sl.usermodel.*;
 import org.apache.poi.util.IOUtils;
 import org.apache.poi.xslf.usermodel.*;
@@ -537,7 +538,8 @@ public class NewPptCreator {
         createDefaultTextRun();
         currentTextRun.setText(label);
 
-        if (Utils.isUrl(url)) {
+        UrlValidator validator = new UrlValidator();
+        if (validator.isValid(url)) {
             XSLFHyperlink link = currentTextRun.createHyperlink();
             link.setAddress(url);
         }

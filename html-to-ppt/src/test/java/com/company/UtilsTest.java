@@ -1,8 +1,10 @@
 package com.company;
 
+import com.company.data.Indicators;
 import com.company.data.MilestoneDTO;
 import com.company.enums.IndicatorStatus;
 import com.company.enums.MilestoneStatus;
+import org.apache.commons.validator.routines.UrlValidator;
 import org.apache.poi.sl.usermodel.ColorStyle;
 import org.apache.poi.sl.usermodel.PaintStyle;
 import org.apache.poi.xslf.usermodel.*;
@@ -180,15 +182,27 @@ public class UtilsTest {
 
     @Test
     public void getIndicatorsStatus() {
-    }
+        Indicators indicators = new Indicators(0, 1, 2, 3, 4);
+        assertEquals(IndicatorStatus.BLANK, Utils.getIndicatorsStatus(indicators, "overall"));
+        assertEquals(IndicatorStatus.GREEN, Utils.getIndicatorsStatus(indicators, "schedule"));
+        assertEquals(IndicatorStatus.YELLOW, Utils.getIndicatorsStatus(indicators, "scope"));
+        assertEquals(IndicatorStatus.RED, Utils.getIndicatorsStatus(indicators, "quality"));
+        assertEquals(IndicatorStatus.BLANK, Utils.getIndicatorsStatus(indicators, "cost"));
 
-    @Test
-    public void isUrl() {
-
+        assertEquals(IndicatorStatus.BLANK, Utils.getIndicatorsStatus(null, "anylabel"));
     }
 
     @Test
     public void formatDate() {
+        Calendar calendar = Calendar.getInstance();
+        calendar.set(Calendar.YEAR, 2020);
+        calendar.set(Calendar.MONTH, 3);
+        calendar.set(Calendar.DAY_OF_MONTH, 21);
 
+        String actual = Utils.formatDate(new Date(calendar.getTimeInMillis()));
+        assertEquals("21-Apr-20", actual);
+
+        actual = Utils.formatDate(null);
+        assertEquals("", actual);
     }
 }
