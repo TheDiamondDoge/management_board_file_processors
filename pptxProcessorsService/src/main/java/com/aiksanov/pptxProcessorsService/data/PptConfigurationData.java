@@ -1,6 +1,10 @@
 package com.aiksanov.pptxProcessorsService.data;
 
-import com.company.data.*;
+import com.company.data.MilestoneDTO;
+import com.company.data.ProjectGeneral;
+import com.company.data.Requirements;
+import com.company.data.Risk;
+import com.company.data.HealthIndicatorsDTO;
 
 import java.util.List;
 
@@ -21,71 +25,63 @@ public class PptConfigurationData {
         return general;
     }
 
-    public PptConfigurationData setGeneral(ProjectGeneral general) {
+    public void setGeneral(ProjectGeneral general) {
         this.general = general;
-        return this;
     }
 
     public List<MilestoneDTO> getMilestones() {
         return milestones;
     }
 
-    public PptConfigurationData setMilestones(List<MilestoneDTO> milestones) {
+    public void setMilestones(List<MilestoneDTO> milestones) {
         this.milestones = milestones;
-        return this;
     }
 
     public List<String> getFlags() {
         return flags;
     }
 
-    public PptConfigurationData setFlags(List<String> flags) {
+    public void setFlags(List<String> flags) {
         this.flags = flags;
-        return this;
     }
 
     public String getExecutionSummary() {
         return executionSummary;
     }
 
-    public PptConfigurationData setExecutionSummary(String executionSummary) {
+    public void setExecutionSummary(String executionSummary) {
         this.executionSummary = executionSummary;
-        return this;
     }
 
     public List<Risk> getRisks() {
         return risks;
     }
 
-    public PptConfigurationData setRisks(List<Risk> risks) {
+    public void setRisks(List<Risk> risks) {
         this.risks = risks;
-        return this;
     }
 
     public String getProjectDetails() {
         return projectDetails;
     }
 
-    public PptConfigurationData setProjectDetails(String projectDetails) {
+    public void setProjectDetails(String projectDetails) {
         this.projectDetails = projectDetails;
-        return this;
     }
 
     public List<Requirements> getRequirements() {
         return requirements;
     }
 
-    public PptConfigurationData setRequirements(List<Requirements> requirements) {
+    public void setRequirements(List<Requirements> requirements) {
         this.requirements = requirements;
-        return this;
     }
 
     public HealthIndicatorsDTO getIndicators() {
         return indicators;
     }
 
-    public PptConfigurationData setIndicators(HealthIndicatorsDTO indicators) {
+    public void setIndicators(HealthIndicatorsDTO indicators) {
         this.indicators = indicators;
-        return this;
     }
 }
