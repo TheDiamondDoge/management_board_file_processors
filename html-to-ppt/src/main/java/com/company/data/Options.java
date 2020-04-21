@@ -9,7 +9,6 @@ public class Options {
     private List<HtmlSection> executiveSummary;
     private Map<String, List<Risk>> risks;
     private List<HtmlSection> otherInformation;
-    private List<HtmlSection> titleWithHtmlSections;
     private List<Requirements> requirements;
     private HealthIndicatorsDTO indicators;
 
@@ -58,15 +57,6 @@ public class Options {
 
     public Options setOtherInformation(List<HtmlSection> otherInformation) {
         this.otherInformation = otherInformation;
-        return this;
-    }
-
-    public List<HtmlSection> getTitleWithHtmlSections() {
-        return titleWithHtmlSections;
-    }
-
-    public Options setTitleWithHtmlSections(List<HtmlSection> titleWithHtmlSections) {
-        this.titleWithHtmlSections = titleWithHtmlSections;
         return this;
     }
 
