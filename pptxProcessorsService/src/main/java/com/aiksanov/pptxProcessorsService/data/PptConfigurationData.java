@@ -1,10 +1,10 @@
 package com.aiksanov.pptxProcessorsService.data;
 
-import com.company.data.MilestoneDTO;
-import com.company.data.ProjectGeneral;
-import com.company.data.Requirements;
-import com.company.data.Risk;
-import com.company.data.HealthIndicatorsDTO;
+import com.aiksanov.data.MilestoneDTO;
+import com.aiksanov.data.ProjectGeneral;
+import com.aiksanov.data.Requirements;
+import com.aiksanov.data.Risk;
+import com.aiksanov.data.HealthIndicatorsDTO;
 
 import java.util.List;
 
