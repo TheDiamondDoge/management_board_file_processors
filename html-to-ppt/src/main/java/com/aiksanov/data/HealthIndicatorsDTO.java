@@ -1,7 +1,7 @@
-package com.company.data;
+package com.aiksanov.data;
 
 
-import com.company.enums.HealthStatus;
+import com.aiksanov.enums.HealthStatus;
 
 import java.util.*;
 

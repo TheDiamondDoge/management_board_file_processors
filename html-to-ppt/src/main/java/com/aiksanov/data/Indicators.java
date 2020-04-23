@@ -1,4 +1,4 @@
-package com.company.data;
+package com.aiksanov.data;
 
 public class Indicators {
     private HealthIndicatorsPK healthIndicatorsPK;

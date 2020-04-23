@@ -1,10 +1,9 @@
-package com.company;
+package com.aiksanov;
 
-import com.company.data.Indicators;
-import com.company.data.MilestoneDTO;
-import com.company.enums.IndicatorStatus;
-import com.company.enums.MilestoneStatus;
-import com.sun.javaws.exceptions.InvalidArgumentException;
+import com.aiksanov.data.Indicators;
+import com.aiksanov.data.MilestoneDTO;
+import com.aiksanov.enums.IndicatorStatus;
+import com.aiksanov.enums.MilestoneStatus;
 import org.apache.poi.xslf.usermodel.XSLFTextRun;
 import org.jsoup.nodes.Element;
 
@@ -12,6 +11,7 @@ import java.awt.*;
 import java.sql.Date;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
+import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
 import java.util.regex.Matcher;
@@ -144,7 +144,7 @@ public class Utils {
                 case "cost":
                     return IndicatorStatus.getStatus(indicators.getCost());
             }
-        } catch (InvalidArgumentException e) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
 
@@ -155,5 +155,9 @@ public class Utils {
         if (Objects.isNull(date)) return "";
         SimpleDateFormat formatter = new SimpleDateFormat("dd-MMM-yy", Locale.ENGLISH);
         return formatter.format(date);
+    }
+
+    public static boolean isListNotNullAndNotEmpty(List<?> list) {
+        return Objects.nonNull(list) && list.size() > 0;
     }
 }

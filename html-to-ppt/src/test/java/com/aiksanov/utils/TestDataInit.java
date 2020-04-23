@@ -1,7 +1,8 @@
-package com.company.utils;
+package com.aiksanov.utils;
 
-import com.company.data.*;
-import com.company.enums.HealthStatus;
+import com.aiksanov.data.*;
+import com.aiksanov.enums.HealthStatus;
+import com.aiksanov.enums.RiskTypes;
 
 import java.sql.Date;
 import java.util.*;
@@ -35,7 +36,7 @@ public class TestDataInit {
         return result;
     }
 
-    public Map<String, List<Risk>>  getRisks() {
+    public Map<RiskTypes, List<Risk>>  getRisks() {
         List<Risk> high = new ArrayList<>();
         List<Risk> moderate = new ArrayList<>();
         List<Risk> low = new ArrayList<>();
@@ -49,10 +50,10 @@ public class TestDataInit {
         low.add(new Risk("Description Low", "Impact Low", "Mitigation Low"));
         low.add(new Risk("Description Low", "Impact Low", "Mitigation Low"));
 
-        Map<String, List<Risk>> result = new HashMap<>();
-        result.put("high", high);
-        result.put("moderate", moderate);
-        result.put("low", low);
+        Map<RiskTypes, List<Risk>> result = new HashMap<>();
+        result.put(RiskTypes.HIGH, high);
+        result.put(RiskTypes.MODERATE, moderate);
+        result.put(RiskTypes.LOW, low);
 
         return result;
     }

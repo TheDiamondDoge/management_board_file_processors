@@ -1,9 +1,11 @@
-package com.company;
+package com.aiksanov;
 
-import com.company.data.*;
-import com.company.services.HtmlExtractor;
-import com.company.services.NewPptCreator;
+import com.aiksanov.data.*;
+import com.aiksanov.enums.RiskTypes;
+import com.aiksanov.services.HtmlExtractor;
+import com.aiksanov.services.NewPptCreator;
 
+import javax.rmi.CORBA.Util;
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
@@ -15,7 +17,7 @@ public class PptCreatorFacade {
         List<MilestoneDTO> milestones = options.getMilestones();
         List<HtmlSection> executiveSummary = options.getExecutiveSummary();
         List<Requirements> requirements = options.getRequirements();
-        Map<String, List<Risk>> risks = options.getRisks();
+        Map<RiskTypes, List<Risk>> risks = options.getRisks();
         List<HtmlSection> otherInformation = options.getOtherInformation();
         Indicators indicators;
         try {
@@ -46,7 +48,7 @@ public class PptCreatorFacade {
         }
 
         //risks section
-        if (Objects.nonNull(risks)) {
+        if (isRisksExist(risks)) {
             pptCreator.setCurrentSectionName("Risks");
             pptCreator.createNewSlide();
             pptCreator.addTextWorkingArea();
@@ -82,7 +84,7 @@ public class PptCreatorFacade {
         List<MilestoneDTO> milestones = options.getMilestones();
         List<HtmlSection> executiveSummary = options.getExecutiveSummary();
         List<Requirements> requirements = options.getRequirements();
-        Map<String, List<Risk>> risks = options.getRisks();
+        Map<RiskTypes, List<Risk>> risks = options.getRisks();
         List<HtmlSection> otherInformation = options.getOtherInformation();
         Indicators indicators;
         try {
@@ -113,7 +115,7 @@ public class PptCreatorFacade {
         }
 
         //risks section
-        if (Objects.nonNull(risks)) {
+        if (isRisksExist(risks)) {
             pptCreator.setCurrentSectionName("Risks");
             pptCreator.createNewSlide();
             pptCreator.addTextWorkingArea();
@@ -137,6 +139,14 @@ public class PptCreatorFacade {
         }
 
         return pptCreator.save(out);
+    }
+
+    private boolean isRisksExist(Map<RiskTypes, List<Risk>> risks) {
+        return Objects.nonNull(risks) && (
+                Utils.isListNotNullAndNotEmpty(risks.get(RiskTypes.HIGH))
+                        || Utils.isListNotNullAndNotEmpty(risks.get(RiskTypes.MODERATE))
+                        || Utils.isListNotNullAndNotEmpty(risks.get(RiskTypes.LOW))
+        );
     }
 
     public String createExecReviewPpt(Options options, String filepath) throws IOException {

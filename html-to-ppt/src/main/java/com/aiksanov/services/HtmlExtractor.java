@@ -1,4 +1,4 @@
-package com.company.services;
+package com.aiksanov.services;
 
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;

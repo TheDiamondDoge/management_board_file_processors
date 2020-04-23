@@ -1,12 +1,9 @@
-package com.company;
+package com.aiksanov;
 
-import com.company.data.Indicators;
-import com.company.data.MilestoneDTO;
-import com.company.enums.IndicatorStatus;
-import com.company.enums.MilestoneStatus;
-import org.apache.commons.validator.routines.UrlValidator;
-import org.apache.poi.sl.usermodel.ColorStyle;
-import org.apache.poi.sl.usermodel.PaintStyle;
+import com.aiksanov.data.Indicators;
+import com.aiksanov.data.MilestoneDTO;
+import com.aiksanov.enums.IndicatorStatus;
+import com.aiksanov.enums.MilestoneStatus;
 import org.apache.poi.xslf.usermodel.*;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Element;
@@ -16,7 +13,9 @@ import org.junit.Test;
 
 import java.awt.*;
 import java.sql.Date;
+import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.List;
 
 import static org.junit.Assert.*;
 
@@ -34,7 +33,7 @@ public class UtilsTest {
     }
 
     @Test
-    public void getMilestoneStatusComplete() {
+    public void testGetMilestoneStatusComplete() {
         MilestoneDTO testMilestone = new MilestoneDTO(
                 null, null, null, 100, null, false
         );
@@ -44,7 +43,7 @@ public class UtilsTest {
     }
 
     @Test
-    public void getMilestoneStatusIncomplete() {
+    public void testGetMilestoneStatusIncomplete() {
         Calendar calendar = Calendar.getInstance();
         calendar.add(Calendar.DATE, -1);
         MilestoneDTO testMilestone = new MilestoneDTO(
@@ -57,7 +56,7 @@ public class UtilsTest {
     }
 
     @Test
-    public void getMilestoneStatusBlank() {
+    public void testGetMilestoneStatusBlank() {
         Calendar calendar = Calendar.getInstance();
         calendar.add(Calendar.DATE, 1);
         MilestoneDTO testMilestone = new MilestoneDTO(
@@ -70,7 +69,7 @@ public class UtilsTest {
     }
 
     @Test
-    public void compareWithToday_yesterday() {
+    public void testCompareWithToday_yesterday() {
         Calendar calendar = Calendar.getInstance();
         calendar.add(Calendar.DATE, -1);
 
@@ -79,7 +78,7 @@ public class UtilsTest {
     }
 
     @Test
-    public void compareWithToday_today() {
+    public void testCompareWithToday_today() {
         Calendar calendar = Calendar.getInstance();
 
         int today = Utils.compareWithToday(new Date(calendar.getTimeInMillis()));
@@ -87,7 +86,7 @@ public class UtilsTest {
     }
 
     @Test
-    public void compareWithToday_tomorrow() {
+    public void testCompareWithToday_tomorrow() {
         Calendar calendar = Calendar.getInstance();
         calendar.add(Calendar.DATE, 1);
 
@@ -96,7 +95,7 @@ public class UtilsTest {
     }
 
     @Test
-    public void getColorByIndStatus() {
+    public void testGetColorByIndStatus() {
         IndicatorStatus status = IndicatorStatus.BLANK;
         Color expectedLightGray = Utils.getColorByIndStatus(status);
         assertEquals(Color.lightGray, expectedLightGray);
@@ -115,7 +114,7 @@ public class UtilsTest {
     }
 
     @Test
-    public void getSymbolByIndStatus() {
+    public void testGetSymbolByIndStatus() {
         IndicatorStatus status = IndicatorStatus.RED;
         String symbolsShort = Utils.getSymbolByIndStatus(status);
         String symbolsFull = Utils.getSymbolByIndStatus(status, true);
@@ -142,7 +141,7 @@ public class UtilsTest {
     }
 
     @Test
-    public void addDecorationByTag() {
+    public void testAddDecorationByTag() {
 
         String aHtmlElement = "<a href='www.test.com'>a</a>";
         Element aElement = Jsoup.parse(aHtmlElement, "", Parser.xmlParser()).select("a").first();
@@ -170,7 +169,7 @@ public class UtilsTest {
     }
 
     @Test
-    public void getColorFromRgbAttribute() {
+    public void testGetColorFromRgbAttribute() {
         String rgbColor = "rgb(12, 34, 56)";
         Color actualColor = Utils.getColorFromRgbAttribute(rgbColor);
         assertEquals(new Color(12, 34, 56), actualColor);
@@ -181,7 +180,7 @@ public class UtilsTest {
     }
 
     @Test
-    public void getIndicatorsStatus() {
+    public void testGetIndicatorsStatus() {
         Indicators indicators = new Indicators(0, 1, 2, 3, 4);
         assertEquals(IndicatorStatus.BLANK, Utils.getIndicatorsStatus(indicators, "overall"));
         assertEquals(IndicatorStatus.GREEN, Utils.getIndicatorsStatus(indicators, "schedule"));
@@ -193,7 +192,7 @@ public class UtilsTest {
     }
 
     @Test
-    public void formatDate() {
+    public void testFormatDate() {
         Calendar calendar = Calendar.getInstance();
         calendar.set(Calendar.YEAR, 2020);
         calendar.set(Calendar.MONTH, 3);
@@ -204,5 +203,17 @@ public class UtilsTest {
 
         actual = Utils.formatDate(null);
         assertEquals("", actual);
+    }
+
+    @Test
+    public void isListNotNullAndNotEmpty() {
+        List<String> riskList = null;
+        List<String> riskListEmpty = new ArrayList<>();
+        List<String> withData = new ArrayList<>();
+        withData.add("Hell-o!");
+
+        assertFalse(Utils.isListNotNullAndNotEmpty(riskList));
+        assertFalse(Utils.isListNotNullAndNotEmpty(riskListEmpty));
+        assertTrue(Utils.isListNotNullAndNotEmpty(withData));
     }
 }

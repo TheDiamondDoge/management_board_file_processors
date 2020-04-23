@@ -1,7 +1,8 @@
-package com.company;
+package com.aiksanov;
 
-import com.company.data.*;
-import com.company.utils.TestDataInit;
+import com.aiksanov.data.*;
+import com.aiksanov.enums.RiskTypes;
+import com.aiksanov.utils.TestDataInit;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
@@ -22,39 +23,39 @@ public class PptCreatorFacadeTest {
     }
 
     @Test
-    public void createMultipageCustomizablePpt() throws IOException {
+    public void testCreateMultipageCustomizablePpt() throws IOException {
         PptCreatorFacade facade = new PptCreatorFacade();
         facade.createMultipageCustomizablePpt(options, "createMultipageCustomizablePpt.pptx");
     }
 
     @Test
-    public void createMultipageIndicatorsPpt() throws IOException {
+    public void testCreateMultipageIndicatorsPpt() throws IOException {
         PptCreatorFacade facade = new PptCreatorFacade();
         facade.createMultipageIndicatorsPpt(options, "createMultipageIndicatorsPpt.pptx");
     }
 
     @Test
-    public void createExecReviewPpt() throws IOException {
+    public void testCreateExecReviewPpt() throws IOException {
         PptCreatorFacade facade = new PptCreatorFacade();
         facade.createExecReviewPpt(options, "createExecReviewPpt.pptx");
     }
 
     @Test
-    public void createMultipageCustomizablePptWithAllNulls() throws IOException {
+    public void testCreateMultipageCustomizablePptWithAllNulls() throws IOException {
         PptCreatorFacade facade = new PptCreatorFacade();
         Options options = getOptionsWithAllNulls();
         facade.createMultipageCustomizablePpt(options, "createMultipageCustomizablePptWithAllNulls.pptx");
     }
 
     @Test
-    public void createMultipageIndicatorsPptWithAllNulls() throws IOException {
+    public void testCreateMultipageIndicatorsPptWithAllNulls() throws IOException {
         PptCreatorFacade facade = new PptCreatorFacade();
         Options options = getOptionsWithAllNulls();
         facade.createMultipageIndicatorsPpt(options, "createMultipageIndicatorsPptWithAllNulls.pptx");
     }
 
     @Test
-    public void createExecReviewPptWithAllNulls() throws IOException {
+    public void testCreateExecReviewPptWithAllNulls() throws IOException {
         PptCreatorFacade facade = new PptCreatorFacade();
         Options options = getOptionsWithAllNulls();
         facade.createExecReviewPpt(options, "createExecReviewPptWithAllNulls.pptx");
@@ -67,7 +68,7 @@ public class PptCreatorFacadeTest {
         List<HtmlSection> execSummary = dataInit.getExecSummary();
         List<Requirements> requirements = dataInit.getReqs();
         List<HtmlSection> otherInformation = dataInit.getOtherInformation();
-        Map<String, List<Risk>> risks = dataInit.getRisks();
+        Map<RiskTypes, List<Risk>> risks = dataInit.getRisks();
         HealthIndicatorsDTO healthIndicators = dataInit.getHealthIndicators();
 
         return new Options()

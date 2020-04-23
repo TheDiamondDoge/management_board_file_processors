@@ -1,4 +1,4 @@
-package com.company.enums;
+package com.aiksanov.enums;
 
 public enum HealthStatus {
     OVERALL("overall"),

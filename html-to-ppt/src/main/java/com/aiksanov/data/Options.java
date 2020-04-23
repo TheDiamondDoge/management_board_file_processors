@@ -1,4 +1,6 @@
-package com.company.data;
+package com.aiksanov.data;
+
+import com.aiksanov.enums.RiskTypes;
 
 import java.util.List;
 import java.util.Map;
@@ -7,7 +9,7 @@ public class Options {
     private ProjectGeneral generalInfo;
     private List<MilestoneDTO> milestones;
     private List<HtmlSection> executiveSummary;
-    private Map<String, List<Risk>> risks;
+    private Map<RiskTypes, List<Risk>> risks;
     private List<HtmlSection> otherInformation;
     private List<Requirements> requirements;
     private HealthIndicatorsDTO indicators;
@@ -42,11 +44,11 @@ public class Options {
         return this;
     }
 
-    public Map<String, List<Risk>> getRisks() {
+    public Map<RiskTypes, List<Risk>> getRisks() {
         return risks;
     }
 
-    public Options setRisks(Map<String, List<Risk>> risks) {
+    public Options setRisks(Map<RiskTypes, List<Risk>> risks) {
         this.risks = risks;
         return this;
     }

@@ -1,4 +1,4 @@
-package com.company.data;
+package com.aiksanov.data;
 
 import java.util.Date;
 

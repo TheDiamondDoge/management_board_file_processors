@@ -1,11 +1,10 @@
-package com.company.services;
+package com.aiksanov.services;
 
-import com.company.Utils;
-import com.company.data.HealthIndicatorsDTO;
-import com.company.data.Indicators;
-import com.company.enums.HealthStatus;
-import com.company.enums.IndicatorStatus;
-import com.sun.javaws.exceptions.InvalidArgumentException;
+import com.aiksanov.Utils;
+import com.aiksanov.data.HealthIndicatorsDTO;
+import com.aiksanov.data.Indicators;
+import com.aiksanov.enums.HealthStatus;
+import com.aiksanov.enums.IndicatorStatus;
 import org.apache.poi.sl.usermodel.StrokeStyle;
 import org.apache.poi.sl.usermodel.TableCell;
 import org.apache.poi.sl.usermodel.TextParagraph;
@@ -15,6 +14,7 @@ import org.apache.poi.xslf.usermodel.*;
 import java.awt.*;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 public class PptElementsHelper {
     public static final int FONT_SIZE = 14;
@@ -78,7 +78,7 @@ public class PptElementsHelper {
                 IndicatorStatus indicatorStatus;
                 try {
                     indicatorStatus = IndicatorStatus.getStatus(indicatorValue);
-                } catch (InvalidArgumentException e) {
+                } catch (Exception e) {
                     indicatorStatus = IndicatorStatus.BLANK;
                 }
                 currentTextRun.setFontColor(Utils.getColorByIndStatus(indicatorStatus));
@@ -111,7 +111,7 @@ public class PptElementsHelper {
             return 0;
         }
 
-        if (cellInd == 1) {
+        if (cellInd == 1 && Objects.nonNull(prev)) {
             switch (rowInd) {
                 case 1:
                     return prev.getOverall();
@@ -124,7 +124,7 @@ public class PptElementsHelper {
                 case 5:
                     return prev.getCost();
             }
-        } else if (cellInd == 2) {
+        } else if (cellInd == 2 && Objects.nonNull(curr)) {
             switch (rowInd) {
                 case 1:
                     return curr.getOverall();

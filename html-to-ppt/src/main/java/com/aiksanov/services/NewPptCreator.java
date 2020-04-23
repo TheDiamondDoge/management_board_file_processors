@@ -1,10 +1,10 @@
-package com.company.services;
+package com.aiksanov.services;
 
-import com.company.Utils;
-import com.company.data.*;
-import com.company.enums.IndicatorStatus;
-import com.company.enums.MilestoneStatus;
-import com.sun.javaws.exceptions.InvalidArgumentException;
+import com.aiksanov.Utils;
+import com.aiksanov.data.*;
+import com.aiksanov.enums.IndicatorStatus;
+import com.aiksanov.enums.MilestoneStatus;
+import com.aiksanov.enums.RiskTypes;
 import org.apache.commons.validator.routines.UrlValidator;
 import org.apache.poi.sl.usermodel.*;
 import org.apache.poi.util.IOUtils;
@@ -220,20 +220,20 @@ public class NewPptCreator {
         }
     }
 
-    public void addRisksToSlide(Map<String, List<Risk>> risks) {
+    public void addRisksToSlide(Map<RiskTypes, List<Risk>> risks) {
         if (Objects.isNull(risks)) {
             return;
         }
 
-        String[] sectionsOrder = {"high", "moderate", "low"};
+        RiskTypes[] sectionsOrder = {RiskTypes.HIGH, RiskTypes.MODERATE, RiskTypes.LOW};
         Color[] sectionColors = {Color.red, Color.orange, Color.green};
-        Map<String, String> sectionToLabel = new HashMap<>();
-        sectionToLabel.put("high", "High Risks");
-        sectionToLabel.put("moderate", "Moderate Risks");
-        sectionToLabel.put("low", "Low Risks");
+        Map<RiskTypes, String> sectionToLabel = new HashMap<>();
+        sectionToLabel.put(RiskTypes.HIGH, "High Risks");
+        sectionToLabel.put(RiskTypes.MODERATE, "Moderate Risks");
+        sectionToLabel.put(RiskTypes.LOW, "Low Risks");
 
         for (int i = 0; i < sectionsOrder.length; i++) {
-            String section = sectionsOrder[i];
+            RiskTypes section = sectionsOrder[i];
             Color color = sectionColors[i];
             List<Risk> sectionRisks = risks.get(section);
             if (Objects.nonNull(sectionRisks) && sectionRisks.size() > 0) {
@@ -399,11 +399,12 @@ public class NewPptCreator {
         try {
             int width = 162;
             int height = 41;
-            byte[] picture = IOUtils.toByteArray(new FileInputStream("src/main/resources/img/logo.png"));
+            InputStream logo = getClass().getClassLoader().getResourceAsStream("img/logo.png");
+            byte[] picture = IOUtils.toByteArray(logo);
             XSLFPictureData pictureData = ppt.addPicture(picture, XSLFPictureData.PictureType.PNG);
             XSLFPictureShape pictureShape = currentSlide.createPicture(pictureData);
             pictureShape.setAnchor(new Rectangle(SLIDE_WIDTH - SLIDE_PADDING - width, y + 10, width, height));
-        } catch (IOException e) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
 
@@ -483,7 +484,7 @@ public class NewPptCreator {
         IndicatorStatus status;
         try {
             status = IndicatorStatus.getStatus(overall);
-        } catch (InvalidArgumentException e) {
+        } catch (Exception e) {
             status = IndicatorStatus.BLANK;
         }
         drawTimelineStatusIndicator(timelineIndicatorX, y - 16, status);
@@ -546,7 +547,7 @@ public class NewPptCreator {
 
         try {
             addMilestoneCompletion(x + 26, y - 25, status);
-        } catch (IOException e) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
     }
@@ -569,10 +570,11 @@ public class NewPptCreator {
         currentTextRun.setText(baseline);
     }
 
-    private void addMilestoneCompletion(int x, int y, MilestoneStatus status) throws IOException {
+    private void addMilestoneCompletion(int x, int y, MilestoneStatus status) throws Exception {
         if (status != MilestoneStatus.BLANK) {
-            String imgPath = "src/main/resources/img/" + status.getValue() + ".png";
-            byte[] picture = IOUtils.toByteArray(new FileInputStream(imgPath));
+            String imgPath = "img/" + status.getValue() + ".png";
+            InputStream statusIcon = getClass().getClassLoader().getResourceAsStream(imgPath);
+            byte[] picture = IOUtils.toByteArray(statusIcon);
             XSLFPictureData pictureData = ppt.addPicture(picture, XSLFPictureData.PictureType.PNG);
             XSLFPictureShape pictureShape = currentSlide.createPicture(pictureData);
             pictureShape.setAnchor(new Rectangle(x, y, 20, 20));

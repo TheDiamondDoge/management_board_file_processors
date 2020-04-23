@@ -1,4 +1,4 @@
-package com.company.enums;
+package com.aiksanov.enums;
 
 public enum MilestoneStatus {
     BLANK("blank"), INCOMPLETE("close"), COMPLETE("check");

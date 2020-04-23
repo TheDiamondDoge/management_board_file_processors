@@ -1,6 +1,4 @@
-package com.company.enums;
-
-import com.sun.javaws.exceptions.InvalidArgumentException;
+package com.aiksanov.enums;
 
 public enum IndicatorStatus {
     BLANK(0), GREEN(1), YELLOW(2), RED(3);
@@ -14,13 +12,13 @@ public enum IndicatorStatus {
         return value;
     }
 
-    public static IndicatorStatus getStatus(int value) throws InvalidArgumentException {
+    public static IndicatorStatus getStatus(int value) throws Exception {
         for (IndicatorStatus val : values()) {
             if (val.getValue() == value) {
                 return val;
             }
         }
 
-        throw new InvalidArgumentException(new String[]{String.valueOf(value)});
+        throw new Exception(String.valueOf(value));
     }
 }

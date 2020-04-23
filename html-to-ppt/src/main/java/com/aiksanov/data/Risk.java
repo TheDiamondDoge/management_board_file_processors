@@ -1,6 +1,7 @@
-package com.company.data;
+package com.aiksanov.data;
 
 public class Risk {
+    private Float rating;
     private String riskDescription;
     private String impactDescription;
     private String mitigation;
@@ -12,6 +13,14 @@ public class Risk {
         this.riskDescription = riskDescription;
         this.impactDescription = impactDescription;
         this.mitigation = mitigation;
+    }
+
+    public Float getRating() {
+        return rating;
+    }
+
+    public void setRating(Float rating) {
+        this.rating = rating;
     }
 
     public String getRiskDescription() {
