@@ -93,6 +93,9 @@ public class Utils {
             case "s":
                 run.setStrikethrough(true);
                 break;
+            case "em":
+                run.setItalic(true);
+                break;
             case "a":
                 String href = e.attr("href");
                 run.createHyperlink().setAddress(href);
