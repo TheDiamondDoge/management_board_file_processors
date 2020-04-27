@@ -476,6 +476,8 @@ public class NewPptCreator {
                             timelineIndicatorX = currentXPosition - (step / 2) - 8;
                             positionFound = true;
                         }
+                    } else {
+                        timelineIndicatorX = currentXPosition + (step / 2) - 8;
                     }
                 }
             }
