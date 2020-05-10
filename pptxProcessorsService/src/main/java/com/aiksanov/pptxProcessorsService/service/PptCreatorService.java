@@ -100,9 +100,15 @@ public class PptCreatorService {
     }
 
     private Map<RiskTypes, List<Risk>> getListRisksToMap(List<Risk> risks) {
-        List<Risk> low = risks.stream().filter(risk -> risk.getRating() > 0 && risk.getRating() < 6).collect(Collectors.toList());
-        List<Risk> moderate = risks.stream().filter(risk -> risk.getRating() >= 6 && risk.getRating() <= 10).collect(Collectors.toList());
-        List<Risk> high = risks.stream().filter(risk -> risk.getRating() > 10).collect(Collectors.toList());
+        List<Risk> low = risks.stream()
+                .filter(risk -> Objects.nonNull(risk.getRating()) && risk.getRating() > 0 && risk.getRating() < 6)
+                .collect(Collectors.toList());
+        List<Risk> moderate = risks.stream()
+                .filter(risk -> Objects.nonNull(risk.getRating()) && risk.getRating() >= 6 && risk.getRating() <= 10)
+                .collect(Collectors.toList());
+        List<Risk> high = risks.stream()
+                .filter(risk -> Objects.nonNull(risk.getRating()) && risk.getRating() > 10)
+                .collect(Collectors.toList());
         Map<RiskTypes, List<Risk>> risksMap = new HashMap<>();
         risksMap.put(RiskTypes.LOW, low);
         risksMap.put(RiskTypes.MODERATE, moderate);
