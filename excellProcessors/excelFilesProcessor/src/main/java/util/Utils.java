@@ -5,10 +5,9 @@ import exceptions.WrongDateFormatException;
 import exceptions.WrongImpactValueException;
 import exceptions.WrongNumberFormatException;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
-import org.apache.poi.ss.usermodel.Cell;
-import org.apache.poi.ss.usermodel.CellType;
-import org.apache.poi.ss.usermodel.Row;
-import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.ss.usermodel.*;
+import org.apache.poi.xssf.usermodel.XSSFCellStyle;
+import org.apache.poi.xssf.usermodel.XSSFCreationHelper;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
 import java.io.FileInputStream;
@@ -137,6 +136,15 @@ public class Utils {
             cell.setCellValue(value);
         } else {
             cell.setCellValue("");
+        }
+    }
+
+    public static Date getDateWithTimeFromString(String value) {
+        SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
+        try {
+            return format.parse(value);
+        } catch (ParseException e) {
+            return null;
         }
     }
 }
