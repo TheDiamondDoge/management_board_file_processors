@@ -2,9 +2,12 @@ package data;
 
 public class PlainXlsxDataDTO {
     private String[] header;
-    private String[] data;
+    private String[][] data;
 
-    public PlainXlsxDataDTO(String[] header, String[] data) {
+    public PlainXlsxDataDTO() {
+    }
+
+    public PlainXlsxDataDTO(String[] header, String[][] data) {
         this.header = header;
         this.data = data;
     }
@@ -17,11 +20,11 @@ public class PlainXlsxDataDTO {
         this.header = header;
     }
 
-    public String[] getData() {
+    public String[][] getData() {
         return data;
     }
 
-    public void setData(String[] data) {
+    public void setData(String[][] data) {
         this.data = data;
     }
 }

@@ -2,6 +2,7 @@ package com.iksanov.excellProcessors.controller;
 
 import com.iksanov.excellProcessors.service.MainService;
 import data.CostDTO;
+import data.PlainXlsxDataDTO;
 import data.Risk;
 import data.RisksDTO;
 import exceptions.NoSheetFoundException;
@@ -29,9 +30,6 @@ public class MainController {
 
     private MainService mainService;
 
-    @Value("${tmp.file.storage}")
-    private String filepathDirectory;
-
     @Autowired
     public MainController(MainService mainService) {
         this.mainService = mainService;
@@ -46,14 +44,18 @@ public class MainController {
     @PostMapping("/risksFile/{projectName}")
     public ByteArrayResource getRisksFile(@RequestBody List<Risk> risks, @PathVariable String projectName) throws IOException, NoSheetFoundException {
         LOGGER.info("GET /processors/risksFile/{}", projectName);
-        RisksFileGenerator generator = new RisksFileGenerator(filepathDirectory);
-        String filepath = generator.generateXlsxFile(risks, projectName);
-        return new ByteArrayResource(Files.readAllBytes(Paths.get(filepath)));
+        return this.mainService.getRiskFile(risks, projectName);
     }
 
     @PostMapping("/cost/{bd}")
     public CostDTO extractCostFromFile(MultipartFile file, @PathVariable String bd) throws NoSheetFoundException, IOException, WrongBDValueException {
         LOGGER.info("POST /processors/cost/{} Filename: {}", bd, file.getOriginalFilename());
         return this.mainService.processCostFile(file, bd);
+    }
+
+    @PostMapping("/plainXlsx")
+    public ByteArrayResource getPlainXlsxFile(@RequestBody PlainXlsxDataDTO data) throws IOException {
+        LOGGER.info("POST /processors/plainXlsx");
+        return this.mainService.getPlainXlsxFile(data);
     }
 }
