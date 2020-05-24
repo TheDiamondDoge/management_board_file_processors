@@ -147,4 +147,13 @@ public class Utils {
             return null;
         }
     }
+
+    public static Date getDateFromString(String value) {
+        SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
+        try {
+            return format.parse(value);
+        } catch (ParseException e) {
+            return null;
+        }
+    }
 }
