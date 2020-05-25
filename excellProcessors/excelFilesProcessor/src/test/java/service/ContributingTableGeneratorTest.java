@@ -23,6 +23,21 @@ public class ContributingTableGeneratorTest {
     }
 
     private ContribProjectsDataDTO getDto() {
+        List<ContributingProjectDTO> offers = new ArrayList<>();
+        offers.add(getOffer());
+        offers.add(getOffer());
+
+        List<ContributingProjectDTO> products = new ArrayList<>();
+        products.add(getProduct());
+        products.add(getProduct());
+
+        Date minDate = Utils.getDateFromString("2018-08-28");
+        Date maxDate = Utils.getDateFromString("2020-08-07");
+
+        return new ContribProjectsDataDTO(offers, products, maxDate, minDate);
+    }
+
+    private ContributingProjectDTO getOffer() {
         ContributingProjectDTO offerDTO = new ContributingProjectDTO();
         MilestoneDTO offerLastApproved = new MilestoneDTO();
         offerLastApproved.setLabel("DR4");
@@ -35,9 +50,17 @@ public class ContributingTableGeneratorTest {
         offerDTO.setProjectState(ProjectStates.CLOSED);
         offerDTO.setProjectType("Offer");
         offerDTO.setLastApproved(offerLastApproved);
-        List<ContributingProjectDTO> offers = new ArrayList<>();
-        offers.add(offerDTO);
 
+        List<MilestoneDTO> offerMilestones = new ArrayList<>();
+        offerMilestones.add(new MilestoneDTO("DR0", Utils.getDateFromString("2019-03-04"), 100));
+        offerMilestones.add(new MilestoneDTO("DR1", Utils.getDateFromString("2019-03-25"), 100));
+        offerMilestones.add(new MilestoneDTO("DR4", Utils.getDateFromString("2019-04-26"), 100));
+        offerDTO.setMilestones(offerMilestones);
+
+        return offerDTO;
+    }
+
+    private ContributingProjectDTO getProduct() {
         ContributingProjectDTO productDTO = new ContributingProjectDTO();
         MilestoneDTO productLastApproved = new MilestoneDTO();
         productLastApproved.setLabel("DR3");
@@ -50,12 +73,19 @@ public class ContributingTableGeneratorTest {
         productDTO.setProjectState(ProjectStates.COMMITTED);
         productDTO.setProjectType("Product");
         productDTO.setLastApproved(productLastApproved);
-        List<ContributingProjectDTO> products = new ArrayList<>();
-        products.add(productDTO);
 
-        Date minDate = Utils.getDateFromString("2018-08-28");
-        Date maxDate = Utils.getDateFromString("2020-08-07");
+        List<MilestoneDTO> productMilestones = new ArrayList<>();
+        productMilestones.add(new MilestoneDTO("OR", Utils.getDateFromString("2018-08-28"), 100));
+        productMilestones.add(new MilestoneDTO("DR0", Utils.getDateFromString("2018-09-28"), 100));
+        productMilestones.add(new MilestoneDTO("DR1", Utils.getDateFromString("2019-01-25"), 100));
+        productMilestones.add(new MilestoneDTO("DR2", Utils.getDateFromString("2019-08-30"), 0));
+        productMilestones.add(new MilestoneDTO("DR3", Utils.getDateFromString("2019-10-25"), 0));
+        productMilestones.add(new MilestoneDTO("CI", Utils.getDateFromString("2019-10-25"), 0));
+        productMilestones.add(new MilestoneDTO("TR", Utils.getDateFromString("2020-05-29"), 0));
+        productMilestones.add(new MilestoneDTO("DR4", Utils.getDateFromString("2020-06-12"), 0));
+        productMilestones.add(new MilestoneDTO("DR5", Utils.getDateFromString("2020-08-07"), 0));
+        productDTO.setMilestones(productMilestones);
 
-        return new ContribProjectsDataDTO(offers, products, maxDate, minDate);
+        return productDTO;
     }
 }

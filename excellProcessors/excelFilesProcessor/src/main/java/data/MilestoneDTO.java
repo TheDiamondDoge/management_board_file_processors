@@ -1,8 +1,9 @@
 package data;
 
 import java.util.Date;
+import java.util.Objects;
 
-public class MilestoneDTO {
+public class MilestoneDTO implements Comparable<MilestoneDTO> {
     private String label;
     private Date baselineDate;
     private Date actualDate;
@@ -11,6 +12,12 @@ public class MilestoneDTO {
     private boolean shown;
 
     public MilestoneDTO() {
+    }
+
+    public MilestoneDTO(String label, Date actualDate, int completion) {
+        this.label = label;
+        this.actualDate = actualDate;
+        this.completion = completion;
     }
 
     public String getLabel() {
@@ -59,5 +66,15 @@ public class MilestoneDTO {
 
     public void setShown(boolean shown) {
         this.shown = shown;
+    }
+
+    @Override
+    public int compareTo(MilestoneDTO o) {
+        Date d1 = Objects.isNull(this.getActualDate()) ? this.getBaselineDate() : this.getActualDate();
+        Date d2 = Objects.isNull(o.getActualDate()) ? o.getBaselineDate() : o.getActualDate();
+        if (Objects.isNull(d1) || Objects.isNull(d2)) {
+            return 0;
+        }
+        return d1.compareTo(d2);
     }
 }
