@@ -79,8 +79,8 @@ public class ContributingTableGeneratorTest {
         productMilestones.add(new MilestoneDTO("DR0", Utils.getDateFromString("2018-09-28"), 100));
         productMilestones.add(new MilestoneDTO("DR1", Utils.getDateFromString("2019-01-25"), 100));
         productMilestones.add(new MilestoneDTO("DR2", Utils.getDateFromString("2019-08-30"), 0));
-        productMilestones.add(new MilestoneDTO("DR3", Utils.getDateFromString("2019-10-25"), 0));
-        productMilestones.add(new MilestoneDTO("CI", Utils.getDateFromString("2019-10-25"), 0));
+        productMilestones.add(new MilestoneDTO("DR3", Utils.getDateFromString("2019-10-25"), 100));
+        productMilestones.add(new MilestoneDTO("CI", Utils.getDateFromString("2019-10-04"), 0));
         productMilestones.add(new MilestoneDTO("TR", Utils.getDateFromString("2020-05-29"), 0));
         productMilestones.add(new MilestoneDTO("DR4", Utils.getDateFromString("2020-06-12"), 0));
         productMilestones.add(new MilestoneDTO("DR5", Utils.getDateFromString("2020-08-07"), 0));

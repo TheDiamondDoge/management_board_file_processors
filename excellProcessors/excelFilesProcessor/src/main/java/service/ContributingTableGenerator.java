@@ -3,11 +3,9 @@ package service;
 import data.ContribProjectsDataDTO;
 import data.ContributingProjectDTO;
 import data.MilestoneDTO;
+import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.ss.util.CellRangeAddress;
-import org.apache.poi.xssf.usermodel.XSSFCell;
-import org.apache.poi.xssf.usermodel.XSSFRow;
-import org.apache.poi.xssf.usermodel.XSSFSheet;
-import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.apache.poi.xssf.usermodel.*;
 
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -21,13 +19,18 @@ import java.util.stream.Collectors;
 public class ContributingTableGenerator {
     private final String path;
     private int currentRowToUse;
+    private final int currentYear;
+    private final int currentMonth;
+    private XSSFWorkbook workbook;
 
     public ContributingTableGenerator(String path) {
         this.path = path;
+        this.currentYear = getYear(new Date());
+        this.currentMonth = getMonthNumber(new Date());
     }
 
     public String generateContribTableXlsx(ContribProjectsDataDTO data) throws IOException {
-        XSSFWorkbook workbook = new XSSFWorkbook();
+        workbook = new XSSFWorkbook();
         XSSFSheet sheet = workbook.createSheet();
 
         createHeaderTitle(sheet);
@@ -39,8 +42,12 @@ public class ContributingTableGenerator {
         createHeader(sheet, monthsBetween, startMonthIndex, startYear);
         currentRowToUse = 3;
 
-        createOfferRows(sheet, data.getOffer(), monthsBetween, startMonthIndex, startYear);
-        createOfferRows(sheet, data.getProducts(), monthsBetween, startMonthIndex, startYear);
+        createRows(sheet, data.getOffer(), monthsBetween, startMonthIndex, startYear, false);
+        createRows(sheet, data.getProducts(), monthsBetween, startMonthIndex, startYear, true);
+
+        setAllGreyCellBorders(sheet);
+        setGreenBordersForCurrentMonth(sheet, startMonthIndex, startYear);
+        setAutosizeColumns(sheet);
 
         String filename = "test.xlsx";
         String filepath = path + "/" + filename;
@@ -62,10 +69,13 @@ public class ContributingTableGenerator {
         XSSFRow yearRow = sheet.createRow(1);
         XSSFRow monthRow = sheet.createRow(2);
         XSSFCell offerLabel = monthRow.createCell(0);
+        CellStyle defaultStyle = getDefaultStyle();
+        offerLabel.setCellStyle(defaultStyle);
         offerLabel.setCellValue("Offer");
 
         XSSFCell lastDrLabel = monthRow.createCell(1);
         lastDrLabel.setCellValue("Last Completed (Approved DR)");
+        lastDrLabel.setCellStyle(defaultStyle);
 
         int yearStartPosition = 2;
         int yearsPassed = 0;
@@ -75,11 +85,13 @@ public class ContributingTableGenerator {
             int monthIndex = i + startMonthIndex;
             String monthName = getMonthName(monthIndex);
             cell.setCellValue(monthName);
+            cell.setCellStyle(getDefaultStyle());
 
             if (monthIndex % 12 == 0 || i == monthsBetween) {
                 sheet.addMergedRegion(new CellRangeAddress(1, 1, yearStartPosition, cellIndex));
                 XSSFCell yearCell = yearRow.createCell(yearStartPosition);
                 yearCell.setCellValue(startYear + yearsPassed);
+                yearCell.setCellStyle(getDefaultStyle());
 
                 yearsPassed++;
                 yearStartPosition = cellIndex + 1;
@@ -87,9 +99,10 @@ public class ContributingTableGenerator {
         }
     }
 
-    private void createOfferRows(XSSFSheet sheet, List<ContributingProjectDTO> offers, int monthsBetween, int startMonthIndex, int startYear) {
-        for (ContributingProjectDTO offer : offers) {
-            List<MilestoneDTO> milestones = offer.getMilestones();
+    private void createRows(XSSFSheet sheet, List<ContributingProjectDTO> projects, int monthsBetween, int startMonthIndex, int startYear, boolean isProducts) {
+        for (int x = 0; x < projects.size(); x++) {
+            ContributingProjectDTO project = projects.get(x);
+            List<MilestoneDTO> milestones = project.getMilestones();
             List<MilestoneDTO> filteredMilestones = milestones.stream()
                     .filter(m -> Objects.nonNull(m.getActualDate()))
                     .sorted()
@@ -106,6 +119,19 @@ public class ContributingTableGenerator {
                         .map(MilestoneDTO::getLabel)
                         .collect(Collectors.toList());
 
+                List<String> styles = filteredMilestones.stream()
+                        .filter(m -> isSameMonthAndYear(m.getActualDate(), startYear + finalYearsPassed, monthIndex))
+                        .map(m -> {
+                            int compareRes = m.getActualDate().compareTo(new Date());
+                            if (compareRes < 0 && m.getCompletion() != 100) {
+                                return "red";
+                            } else if (compareRes < 0 && m.getCompletion() == 100) {
+                                return "grey";
+                            } else {
+                                return "none";
+                            }
+                        }).collect(Collectors.toList());
+
                 if (labels.size() > 0) {
                     if (labels.size() > maxRowsHeight) {
                         maxRowsHeight = labels.size();
@@ -113,9 +139,11 @@ public class ContributingTableGenerator {
 
                     for (int j = 0; j < labels.size(); j++) {
                         String label = labels.get(j);
+                        CellStyle style = getMileCellStyle(styles.get(j));
                         XSSFRow row = createOrGetRow(sheet, currentRowToUse + j);
                         XSSFCell labelCell = row.createCell(cellIndex);
                         labelCell.setCellValue(label);
+                        labelCell.setCellStyle(style);
                     }
                 }
 
@@ -124,14 +152,20 @@ public class ContributingTableGenerator {
                 }
             }
 
-            MilestoneDTO lastApproved = offer.getLastApproved();
+            MilestoneDTO lastApprovedMil = project.getLastApproved();
             String lastApprovedLabel = "";
-            if (Objects.nonNull(lastApproved)) {
-                lastApprovedLabel = lastApproved.getLabel();
+            if (Objects.nonNull(lastApprovedMil)) {
+                lastApprovedLabel = lastApprovedMil.getLabel();
             }
 
-            sheet.getRow(currentRowToUse).createCell(0).setCellValue(offer.getProjectName());
-            sheet.getRow(currentRowToUse).createCell(1).setCellValue(lastApprovedLabel);
+            CellStyle defaultStyle = getDefaultStyle();
+            XSSFCell projectName = sheet.getRow(currentRowToUse).createCell(0);
+            XSSFCell lastApproved = sheet.getRow(currentRowToUse).createCell(1);
+            projectName.setCellStyle(getProjectNameStyle(isProducts));
+            lastApproved.setCellStyle(defaultStyle);
+
+            projectName.setCellValue(project.getProjectName());
+            lastApproved.setCellValue(lastApprovedLabel);
 
             int lastRow = currentRowToUse - 1 + maxRowsHeight;
             if (lastRow - currentRowToUse > 0) {
@@ -143,10 +177,134 @@ public class ContributingTableGenerator {
         }
     }
 
+    private void setAutosizeColumns(XSSFSheet sheet) {
+        for (int i = 0; i < sheet.getRow(2).getLastCellNum(); i++) {
+            if (i == 1) continue;
+            sheet.autoSizeColumn(i);
+        }
+    }
+
+    private void setGreenBordersForCurrentMonth(XSSFSheet sheet, int startMonthIndex, int startYear) {
+        int currentMonthCol = getCurrentMonthColumnIndex(sheet, startMonthIndex, startYear);
+        if (currentMonthCol == -1) return;
+        for (int i = 2; i <= sheet.getLastRowNum(); i++) {
+            XSSFRow row = createOrGetRow(sheet, i);
+            XSSFCell cell = createOrGetCell(row, currentMonthCol);
+            CellStyle style = cell.getCellStyle().copy();
+            if (i == 2) {
+                style.setBorderTop(BorderStyle.THICK);
+                style.setTopBorderColor(IndexedColors.GREEN.index);
+            }
+
+            style.setBorderLeft(BorderStyle.THICK);
+            style.setLeftBorderColor(IndexedColors.GREEN.index);
+            style.setBorderRight(BorderStyle.THICK);
+            style.setRightBorderColor(IndexedColors.GREEN.index);
+
+            if (i == sheet.getLastRowNum()) {
+                style.setBorderBottom(BorderStyle.THICK);
+                style.setBottomBorderColor(IndexedColors.GREEN.index);
+            }
+
+            cell.setCellStyle(style);
+        }
+    }
+
+    private void setAllGreyCellBorders(XSSFSheet sheet) {
+        for (int i = 1; i <= sheet.getLastRowNum(); i++) {
+            XSSFRow row = createOrGetRow(sheet, i);
+            XSSFRow headerRow = createOrGetRow(sheet, 2);
+            for (int j = 0; j < headerRow.getLastCellNum(); j++) {
+                XSSFCell cell = createOrGetCell(row, j);
+                CellStyle style = cell.getCellStyle().copy();
+                style.setBorderLeft(BorderStyle.THIN);
+                style.setLeftBorderColor(IndexedColors.GREY_25_PERCENT.index);
+                style.setBorderRight(BorderStyle.THIN);
+                style.setRightBorderColor(IndexedColors.GREY_25_PERCENT.index);
+                style.setBorderTop(BorderStyle.THIN);
+                style.setTopBorderColor(IndexedColors.GREY_25_PERCENT.index);
+                style.setBorderBottom(BorderStyle.THIN);
+                style.setBottomBorderColor(IndexedColors.GREY_25_PERCENT.index);
+                cell.setCellStyle(style);
+            }
+        }
+    }
+
+    private int getCurrentMonthColumnIndex(XSSFSheet sheet, int startMonthIndex, int startYear) {
+        XSSFRow monthsRow = sheet.getRow(2);
+        int yearsPassed = 0;
+        for (int i = 2, month = 0; i < monthsRow.getLastCellNum(); i++, month++) {
+            XSSFCell cell = monthsRow.getCell(i);
+            int monthIndex = month + startMonthIndex;
+            String monthName = cell.getStringCellValue();
+
+            if (isItCurrentMonth(startYear + yearsPassed, monthIndex % 12)) {
+                return i;
+            }
+
+            if (monthName.equals("Jan") && i != 2) {
+                yearsPassed++;
+            }
+        }
+
+        return -1;
+    }
+
+    private CellStyle getMileCellStyle(String status) {
+        CellStyle style = getDefaultStyle();
+        switch (status) {
+            case "red":
+                style.setFillForegroundColor(IndexedColors.RED.index);
+                style.setFillPattern(FillPatternType.FINE_DOTS);
+                return style;
+            case "grey":
+                style.setFillForegroundColor(IndexedColors.GREY_50_PERCENT.index);
+                style.setFillPattern(FillPatternType.FINE_DOTS);
+                return style;
+            default:
+                return style;
+        }
+    }
+
+    private boolean isItCurrentMonth(int curYear, int curMonthIndex) {
+        return curYear == this.currentYear && curMonthIndex % 12 == this.currentMonth;
+    }
+
+    private CellStyle getProjectNameStyle(boolean isProduct) {
+        CellStyle cellStyle = getDefaultStyle();
+        XSSFFont font = workbook.createFont();
+
+        if (isProduct) {
+            cellStyle.setAlignment(HorizontalAlignment.RIGHT);
+        } else {
+            font.setBold(true);
+            font.setItalic(true);
+            cellStyle.setFont(font);
+        }
+
+        return cellStyle;
+    }
+
+    private CellStyle getDefaultStyle() {
+        CellStyle style = workbook.createCellStyle();
+        style.setAlignment(HorizontalAlignment.CENTER);
+        style.setVerticalAlignment(VerticalAlignment.CENTER);
+        style.setWrapText(true);
+        style.setShrinkToFit(true);
+
+        return style;
+    }
+
     private XSSFRow createOrGetRow(XSSFSheet sheet, int rowIndex) {
         return Objects.nonNull(sheet.getRow(rowIndex))
                 ? sheet.getRow(rowIndex)
                 : sheet.createRow(rowIndex);
+    }
+
+    private XSSFCell createOrGetCell(XSSFRow row, int cellIndex) {
+        return Objects.nonNull(row.getCell(cellIndex))
+                ? row.getCell(cellIndex)
+                : row.createCell(cellIndex);
     }
 
     private boolean isSameMonthAndYear(Date date, int year, int month) {
