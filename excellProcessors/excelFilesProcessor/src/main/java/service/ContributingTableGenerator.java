@@ -17,11 +17,12 @@ import java.time.temporal.ChronoUnit;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import static util.Utils.*;
+
 public class ContributingTableGenerator {
     private final int yearRowIndex = 1;
     private final int monthsRowIndex = 2;
     private final int dataColumnStartIndex = 2;
-    private final int dataRowStartIndex = 3;
     private final String path;
     private final int currentYear;
     private final int currentMonth;
@@ -222,16 +223,7 @@ public class ContributingTableGenerator {
             XSSFRow headerRow = createOrGetRow(sheet, monthsRowIndex);
             for (int j = 0; j < headerRow.getLastCellNum(); j++) {
                 XSSFCell cell = createOrGetCell(row, j);
-                CellStyle style = cell.getCellStyle().copy();
-                style.setBorderLeft(BorderStyle.THIN);
-                style.setLeftBorderColor(IndexedColors.GREY_25_PERCENT.index);
-                style.setBorderRight(BorderStyle.THIN);
-                style.setRightBorderColor(IndexedColors.GREY_25_PERCENT.index);
-                style.setBorderTop(BorderStyle.THIN);
-                style.setTopBorderColor(IndexedColors.GREY_25_PERCENT.index);
-                style.setBorderBottom(BorderStyle.THIN);
-                style.setBottomBorderColor(IndexedColors.GREY_25_PERCENT.index);
-                cell.setCellStyle(style);
+                decorateCellWithGreyBorders(cell);
             }
         }
     }
@@ -299,18 +291,6 @@ public class ContributingTableGenerator {
         style.setShrinkToFit(true);
 
         return style;
-    }
-
-    private XSSFRow createOrGetRow(XSSFSheet sheet, int rowIndex) {
-        return Objects.nonNull(sheet.getRow(rowIndex))
-                ? sheet.getRow(rowIndex)
-                : sheet.createRow(rowIndex);
-    }
-
-    private XSSFCell createOrGetCell(XSSFRow row, int cellIndex) {
-        return Objects.nonNull(row.getCell(cellIndex))
-                ? row.getCell(cellIndex)
-                : row.createCell(cellIndex);
     }
 
     private boolean isSameMonthAndYear(Date date, int year, int month) {

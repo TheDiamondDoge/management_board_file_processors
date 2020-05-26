@@ -47,7 +47,7 @@ public class PlainXlsxCreatorTest {
 
     @Test
     public void createXlsxFromHeadersAndData_withDate() throws IOException {
-        String dateStr = "2020-01-01 20:20:20";
+        String dateStr = "2020-01-01";
         PlainXlsxCreator creator = new PlainXlsxCreator("src/test/resources/out");
         String[] headers = {"Header 1", "Header 2", "Header 3"};
 

@@ -1,10 +1,7 @@
 package com.iksanov.excellProcessors.controller;
 
 import com.iksanov.excellProcessors.service.MainService;
-import data.CostDTO;
-import data.PlainXlsxDataDTO;
-import data.Risk;
-import data.RisksDTO;
+import data.*;
 import exceptions.NoSheetFoundException;
 import exceptions.WrongBDValueException;
 import exceptions.WrongFileFormatException;
@@ -57,5 +54,11 @@ public class MainController {
     public ByteArrayResource getPlainXlsxFile(@RequestBody PlainXlsxDataDTO data) throws IOException {
         LOGGER.info("POST /processors/plainXlsx");
         return this.mainService.getPlainXlsxFile(data);
+    }
+
+    @PostMapping("/contribProjects")
+    public ByteArrayResource getContribProjectsFile(@RequestBody ContribProjectsDataDTO data) throws IOException {
+        LOGGER.info("POST /processors/contribProjects");
+        return this.mainService.getContribProjects(data);
     }
 }

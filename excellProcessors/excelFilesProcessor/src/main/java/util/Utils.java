@@ -6,9 +6,7 @@ import exceptions.WrongImpactValueException;
 import exceptions.WrongNumberFormatException;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.ss.usermodel.*;
-import org.apache.poi.xssf.usermodel.XSSFCellStyle;
-import org.apache.poi.xssf.usermodel.XSSFCreationHelper;
-import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.apache.poi.xssf.usermodel.*;
 
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -139,11 +137,20 @@ public class Utils {
         }
     }
 
+    public static Date getDateFromStringWithOrWoTime(String value) {
+        Date date = getDateWithTimeFromString(value);
+        if (Objects.isNull(date)) {
+            return getDateFromString(value);
+        }
+
+        return date;
+    }
+
     public static Date getDateWithTimeFromString(String value) {
         SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
         try {
             return format.parse(value);
-        } catch (ParseException e) {
+        } catch (Exception e) {
             return null;
         }
     }
@@ -152,8 +159,33 @@ public class Utils {
         SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
         try {
             return format.parse(value);
-        } catch (ParseException e) {
+        } catch (Exception e) {
             return null;
         }
+    }
+
+    public static XSSFRow createOrGetRow(XSSFSheet sheet, int rowIndex) {
+        return Objects.nonNull(sheet.getRow(rowIndex))
+                ? sheet.getRow(rowIndex)
+                : sheet.createRow(rowIndex);
+    }
+
+    public static XSSFCell createOrGetCell(XSSFRow row, int cellIndex) {
+        return Objects.nonNull(row.getCell(cellIndex))
+                ? row.getCell(cellIndex)
+                : row.createCell(cellIndex);
+    }
+
+    public static void decorateCellWithGreyBorders(XSSFCell cell) {
+        CellStyle style = cell.getCellStyle().copy();
+        style.setBorderLeft(BorderStyle.THIN);
+        style.setLeftBorderColor(IndexedColors.GREY_25_PERCENT.index);
+        style.setBorderRight(BorderStyle.THIN);
+        style.setRightBorderColor(IndexedColors.GREY_25_PERCENT.index);
+        style.setBorderTop(BorderStyle.THIN);
+        style.setTopBorderColor(IndexedColors.GREY_25_PERCENT.index);
+        style.setBorderBottom(BorderStyle.THIN);
+        style.setBottomBorderColor(IndexedColors.GREY_25_PERCENT.index);
+        cell.setCellStyle(style);
     }
 }
