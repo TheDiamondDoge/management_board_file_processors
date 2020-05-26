@@ -3,26 +3,82 @@ package service;
 import data.ContribProjectsDataDTO;
 import data.ContributingProjectDTO;
 import data.MilestoneDTO;
+import org.apache.poi.xssf.usermodel.XSSFRow;
+import org.apache.poi.xssf.usermodel.XSSFSheet;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.junit.BeforeClass;
 import org.junit.Test;
 import util.ProjectStates;
 import util.Utils;
 
+import static org.junit.Assert.*;
+
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-import static org.junit.Assert.*;
-
 public class ContributingTableGeneratorTest {
+    private static String file;
 
-    @Test
-    public void generateContribTableXlsx() throws IOException {
-        ContributingTableGenerator generator = new ContributingTableGenerator("src/test/resources/out");
-        generator.generateContribTableXlsx(getDto());
+    @BeforeClass
+    public static void setUp() throws IOException {
+        ContributingTableGenerator generator = new ContributingTableGenerator("src/test/resources/out/", true);
+        file = generator.generateContribTableXlsx(getDto());
     }
 
-    private ContribProjectsDataDTO getDto() {
+    @Test
+    public void generateContribTableXlsx_monthsGeneration() throws IOException {
+        File xlsx = new File(file);
+        FileInputStream fis = new FileInputStream(xlsx);
+        XSSFWorkbook workbook = new XSSFWorkbook(fis);
+        XSSFSheet sheet = workbook.getSheetAt(0);
+        XSSFRow monthsRow = sheet.getRow(2);
+        String[] months = {"Aug", "Sep", "Oct", "Nov", "Dec", "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec", "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug"};
+        for (int i = 2; i < monthsRow.getLastCellNum(); i++) {
+            assertEquals(months[i - 2], monthsRow.getCell(i).getStringCellValue());
+        }
+
+        workbook.close();
+        fis.close();
+    }
+
+    @Test
+    public void generateContribTableXlsx_yearGeneration() throws IOException {
+        File xlsx = new File(file);
+        FileInputStream fis = new FileInputStream(xlsx);
+        XSSFWorkbook workbook = new XSSFWorkbook(fis);
+        XSSFSheet sheet = workbook.getSheetAt(0);
+        XSSFRow yearsRow = sheet.getRow(1);
+
+        assertEquals(2018, (int) yearsRow.getCell(2).getNumericCellValue());
+        assertEquals(2019, (int) yearsRow.getCell(7).getNumericCellValue());
+        assertEquals(2020, (int) yearsRow.getCell(19).getNumericCellValue());
+
+        workbook.close();
+        fis.close();
+    }
+
+    @Test
+    public void generateContribTableXlsx_milestonesPosition() throws IOException {
+        File xlsx = new File(file);
+        FileInputStream fis = new FileInputStream(xlsx);
+        XSSFWorkbook workbook = new XSSFWorkbook(fis);
+        XSSFSheet sheet = workbook.getSheetAt(0);
+        XSSFRow milRow = sheet.getRow(3);
+        XSSFRow milRow2 = sheet.getRow(4);
+
+        assertEquals("DR0", milRow.getCell(9).getStringCellValue());
+        assertEquals("DR4", milRow.getCell(10).getStringCellValue());
+        assertEquals("DR1", milRow2.getCell(9).getStringCellValue());
+
+        workbook.close();
+        fis.close();
+    }
+
+    private static ContribProjectsDataDTO getDto() {
         List<ContributingProjectDTO> offers = new ArrayList<>();
         offers.add(getOffer());
         offers.add(getOffer());
@@ -37,7 +93,7 @@ public class ContributingTableGeneratorTest {
         return new ContribProjectsDataDTO(offers, products, maxDate, minDate);
     }
 
-    private ContributingProjectDTO getOffer() {
+    private static ContributingProjectDTO getOffer() {
         ContributingProjectDTO offerDTO = new ContributingProjectDTO();
         MilestoneDTO offerLastApproved = new MilestoneDTO();
         offerLastApproved.setLabel("DR4");
@@ -60,7 +116,7 @@ public class ContributingTableGeneratorTest {
         return offerDTO;
     }
 
-    private ContributingProjectDTO getProduct() {
+    private static ContributingProjectDTO getProduct() {
         ContributingProjectDTO productDTO = new ContributingProjectDTO();
         MilestoneDTO productLastApproved = new MilestoneDTO();
         productLastApproved.setLabel("DR3");

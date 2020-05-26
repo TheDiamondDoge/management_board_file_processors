@@ -24,6 +24,7 @@ public class ContributingTableGenerator {
     private final String path;
     private final int currentYear;
     private final int currentMonth;
+    private boolean isCommitted;
     private String filename;
     private int currentRowToUse;
     private XSSFWorkbook workbook;
@@ -32,6 +33,14 @@ public class ContributingTableGenerator {
         this.path = path;
         this.currentYear = getYear(new Date());
         this.currentMonth = getMonthNumber(new Date());
+        this.isCommitted = false;
+    }
+
+    public ContributingTableGenerator(String path, boolean isCommitted) {
+        this.path = path;
+        this.currentYear = getYear(new Date());
+        this.currentMonth = getMonthNumber(new Date());
+        this.isCommitted = isCommitted;
     }
 
     public String generateContribTableXlsx(ContribProjectsDataDTO data) throws IOException {
@@ -54,7 +63,7 @@ public class ContributingTableGenerator {
         setGreenBordersForCurrentMonth(sheet, startMonthIndex, startYear);
         setAutosizeColumns(sheet);
 
-        String filename = new Date() + "_contrib.xlsx";
+        String filename = new Date().getTime() + "_contrib.xlsx";
         if (Objects.nonNull(this.filename)) {
             filename = this.filename;
         }
@@ -64,7 +73,7 @@ public class ContributingTableGenerator {
         workbook.write(fileOutputStream);
         workbook.close();
 
-        return null;
+        return filepath;
     }
 
     private void createHeaderTitle(XSSFSheet sheet) {
@@ -132,16 +141,8 @@ public class ContributingTableGenerator {
 
                 List<String> styles = filteredMilestones.stream()
                         .filter(m -> isSameMonthAndYear(m.getActualDate(), startYear + finalYearsPassed, monthIndex))
-                        .map(m -> {
-                            int compareRes = m.getActualDate().compareTo(new Date());
-                            if (compareRes < 0 && m.getCompletion() != 100) {
-                                return "red";
-                            } else if (compareRes < 0 && m.getCompletion() == 100) {
-                                return "grey";
-                            } else {
-                                return "none";
-                            }
-                        }).collect(Collectors.toList());
+                        .map(m -> getMilestoneStyleName(m.getActualDate(), m.getCompletion()))
+                        .collect(Collectors.toList());
 
                 if (labels.size() > 0) {
                     if (labels.size() > maxRowsHeight) {
@@ -188,6 +189,17 @@ public class ContributingTableGenerator {
         }
     }
 
+    private String getMilestoneStyleName(Date milDate, int completion) {
+        int compareRes = milDate.compareTo(new Date());
+        if (compareRes < 0 && completion != 100) {
+            return "red";
+        } else if (compareRes < 0 && this.isCommitted) {
+            return "grey";
+        } else {
+            return "none";
+        }
+    }
+
     private void setAutosizeColumns(XSSFSheet sheet) {
         for (int i = 0; i < sheet.getRow(monthsRowIndex).getLastCellNum(); i++) {
             if (i == 1) continue;
@@ -202,7 +214,7 @@ public class ContributingTableGenerator {
             XSSFRow row = createOrGetRow(sheet, i);
             XSSFCell cell = createOrGetCell(row, currentMonthCol);
             CellStyle style = cell.getCellStyle().copy();
-            if (i == dataRowStartIndex) {
+            if (i == 2) {
                 style.setBorderTop(BorderStyle.THICK);
                 style.setTopBorderColor(IndexedColors.GREEN.index);
             }
@@ -346,7 +358,7 @@ public class ContributingTableGenerator {
         if (index > 12) {
             monthNumber = (index % 12);
         }
-        System.out.println(index + " " + monthNumber);
+
         switch (monthNumber) {
             case 1:
                 return "Jan";
