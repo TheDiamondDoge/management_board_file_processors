@@ -6,8 +6,8 @@ import data.MilestoneDTO;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.ss.util.CellRangeAddress;
 import org.apache.poi.xssf.usermodel.*;
+import util.ProjectStates;
 
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.time.LocalDate;
@@ -25,7 +25,6 @@ public class ContributingTableGenerator {
     private final String path;
     private final int currentYear;
     private final int currentMonth;
-    private boolean isCommitted;
     private String filename;
     private int currentRowToUse;
     private XSSFWorkbook workbook;
@@ -34,14 +33,6 @@ public class ContributingTableGenerator {
         this.path = path;
         this.currentYear = getYear(new Date());
         this.currentMonth = getMonthNumber(new Date());
-        this.isCommitted = false;
-    }
-
-    public ContributingTableGenerator(String path, boolean isCommitted) {
-        this.path = path;
-        this.currentYear = getYear(new Date());
-        this.currentMonth = getMonthNumber(new Date());
-        this.isCommitted = isCommitted;
     }
 
     public String generateContribTableXlsx(ContribProjectsDataDTO data) throws IOException {
@@ -110,6 +101,7 @@ public class ContributingTableGenerator {
     private void createRows(XSSFSheet sheet, List<ContributingProjectDTO> projects, int monthsBetween, int startMonthIndex, int startYear, boolean isProducts) {
         for (int x = 0; x < projects.size(); x++) {
             ContributingProjectDTO project = projects.get(x);
+            ProjectStates state = project.getProjectState();
             List<MilestoneDTO> milestones = project.getMilestones();
 
             if (Objects.isNull(milestones)) return;
@@ -132,7 +124,7 @@ public class ContributingTableGenerator {
 
                 List<String> styles = filteredMilestones.stream()
                         .filter(m -> isSameMonthAndYear(m.getActualDate(), startYear + finalYearsPassed, monthIndex))
-                        .map(m -> getMilestoneStyleName(m.getActualDate(), m.getCompletion()))
+                        .map(m -> getMilestoneStyleName(m.getActualDate(), m.getCompletion(), state))
                         .collect(Collectors.toList());
 
                 if (labels.size() > 0) {
@@ -180,11 +172,11 @@ public class ContributingTableGenerator {
         }
     }
 
-    private String getMilestoneStyleName(Date milDate, int completion) {
+    private String getMilestoneStyleName(Date milDate, int completion, ProjectStates state) {
         int compareRes = milDate.compareTo(new Date());
         if (compareRes < 0 && completion != 100) {
             return "red";
-        } else if (compareRes < 0 && this.isCommitted) {
+        } else if (compareRes < 0 && state == ProjectStates.COMMITTED) {
             return "grey";
         } else {
             return "none";

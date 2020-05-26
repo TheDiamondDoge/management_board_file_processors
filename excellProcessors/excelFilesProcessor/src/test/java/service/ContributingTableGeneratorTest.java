@@ -25,7 +25,7 @@ public class ContributingTableGeneratorTest {
 
     @BeforeClass
     public static void setUp() throws IOException {
-        ContributingTableGenerator generator = new ContributingTableGenerator("src/test/resources/out/", true);
+        ContributingTableGenerator generator = new ContributingTableGenerator("src/test/resources/out");
         file = generator.generateContribTableXlsx(getDto());
     }
 
