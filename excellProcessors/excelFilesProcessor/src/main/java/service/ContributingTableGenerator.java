@@ -7,6 +7,7 @@ import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.ss.util.CellRangeAddress;
 import org.apache.poi.xssf.usermodel.*;
 
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.time.LocalDate;
@@ -63,17 +64,7 @@ public class ContributingTableGenerator {
         setGreenBordersForCurrentMonth(sheet, startMonthIndex, startYear);
         setAutosizeColumns(sheet);
 
-        String filename = new Date().getTime() + "_contrib.xlsx";
-        if (Objects.nonNull(this.filename)) {
-            filename = this.filename;
-        }
-        String filepath = path + "/" + filename;
-
-        FileOutputStream fileOutputStream = new FileOutputStream(filepath);
-        workbook.write(fileOutputStream);
-        workbook.close();
-
-        return filepath;
+        return saveAndClose();
     }
 
     private void createHeaderTitle(XSSFSheet sheet) {
@@ -388,6 +379,20 @@ public class ContributingTableGenerator {
             default:
                 return "";
         }
+    }
+
+    private String saveAndClose() throws IOException {
+        String filename = new Date().getTime() + "_contrib.xlsx";
+        if (Objects.nonNull(this.filename)) {
+            filename = this.filename;
+        }
+        String filepath = path + "/" + filename;
+
+        FileOutputStream fileOutputStream = new FileOutputStream(filepath);
+        workbook.write(fileOutputStream);
+        workbook.close();
+
+        return filepath;
     }
 
     public String getFilename() {
