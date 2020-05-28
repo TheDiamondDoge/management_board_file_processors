@@ -81,11 +81,11 @@ public class UtilsTest {
 
     @Test
     public void getFormattedProbabilityTest() {
-        assertEquals("0.0%", Utils.getFormattedProbability(0f));
-        assertEquals("10.0%", Utils.getFormattedProbability(0.1f));
-        assertEquals("37.9%", Utils.getFormattedProbability(0.3785f));
-        assertEquals("60.0%", Utils.getFormattedProbability(0.6f));
-        assertEquals("100.0%", Utils.getFormattedProbability(1f));
+        assertEquals("0.0%", Utils.getFormattedProbability("0"));
+        assertEquals("10.0%", Utils.getFormattedProbability("0.1"));
+        assertEquals("37.9%", Utils.getFormattedProbability("0.3785"));
+        assertEquals("60.0%", Utils.getFormattedProbability("0.6"));
+        assertEquals("100.0%", Utils.getFormattedProbability("1"));
 
     }
 }

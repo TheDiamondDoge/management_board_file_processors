@@ -32,10 +32,10 @@ public class RisksFileGeneratorTest {
         Risk risk1 = new Risk();
         risk1.setRiskDisplayId("1");
         risk1.setImpact(1);
-        risk1.setProbability(1f);
+        risk1.setProbability("1");
         risk1.setRating(1f);
-        risk1.setPrevious(1f);
-        risk1.setInitial(1f);
+        risk1.setPrevious("1");
+        risk1.setInitial("1");
         risk1.setRiskDescription("desrc");
         risk1.setImpactDescription("impact descr");
         risk1.setBusinessImpact("business impact");
@@ -54,10 +54,10 @@ public class RisksFileGeneratorTest {
         Risk risk2 = new Risk();
         risk2.setRiskDisplayId("2");
         risk2.setImpact(2);
-        risk2.setProbability(2f);
+        risk2.setProbability("2");
         risk2.setRating(2f);
-        risk2.setPrevious(2f);
-        risk2.setInitial(2f);
+        risk2.setPrevious("2");
+        risk2.setInitial("2");
         risk2.setRiskDescription("desrc2");
         risk2.setImpactDescription("impact descr2");
         risk2.setBusinessImpact("business impact2");
@@ -110,8 +110,8 @@ public class RisksFileGeneratorTest {
                 assertEquals(row.getCell(1).getStringCellValue(),
                         Utils.getFormattedProbability(risk.getProbability()));
                 assertEquals(row.getCell(2).getStringCellValue(),  Utils.getFormattedRating(risk.getRating()));
-                assertEquals(row.getCell(3).getNumericCellValue(), risk.getPrevious(), 1);
-                assertEquals(row.getCell(4).getNumericCellValue(), risk.getInitial(), 1);
+                assertEquals(row.getCell(3).getStringCellValue(), risk.getPrevious());
+                assertEquals(row.getCell(4).getStringCellValue(), risk.getInitial());
                 assertEquals(row.getCell(5).getStringCellValue(), risk.getRiskDisplayId());
                 assertEquals(row.getCell(6).getStringCellValue(), risk.getRiskDescription());
                 assertEquals(row.getCell(7).getStringCellValue(), risk.getImpactDescription());

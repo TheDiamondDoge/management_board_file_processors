@@ -5,10 +5,10 @@ import java.util.Date;
 public class Risk {
     private String riskDisplayId;
     private int impact;
-    private Float probability;
+    private String probability;
     private Float rating;
-    private Float previous;
-    private Float initial;
+    private String previous;
+    private String initial;
     private String riskDescription;
     private String impactDescription;
     private String businessImpact;
@@ -43,11 +43,11 @@ public class Risk {
         this.impact = impact;
     }
 
-    public Float getProbability() {
+    public String getProbability() {
         return probability;
     }
 
-    public void setProbability(Float probability) {
+    public void setProbability(String probability) {
         this.probability = probability;
     }
 
@@ -59,19 +59,19 @@ public class Risk {
         this.rating = rating;
     }
 
-    public Float getPrevious() {
+    public String getPrevious() {
         return previous;
     }
 
-    public void setPrevious(Float previous) {
+    public void setPrevious(String previous) {
         this.previous = previous;
     }
 
-    public Float getInitial() {
+    public String getInitial() {
         return initial;
     }
 
-    public void setInitial(Float initial) {
+    public void setInitial(String initial) {
         this.initial = initial;
     }
 

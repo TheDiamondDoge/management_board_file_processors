@@ -114,8 +114,8 @@ public class RisksExtractor {
                         riskPointer.setImpact(impact);
                         break;
                     case 1:
-                        float probability = (float) Utils.getNumber(cell);
-                        riskPointer.setProbability(probability);
+                        double probability = Utils.getNumber(cell);
+                        riskPointer.setProbability(Double.toString(probability));
                         break;
                     case 2:
                         evaluator.evaluateFormulaCell(cell);
@@ -123,12 +123,12 @@ public class RisksExtractor {
                         riskPointer.setRating(rating);
                         break;
                     case 3:
-                        float prev = (float) Utils.getNumber(cell);
-                        riskPointer.setPrevious(prev);
+                        double prev = Utils.getNumber(cell);
+                        riskPointer.setPrevious(Double.toString(prev));
                         break;
                     case 4:
                         float init = (float) Utils.getNumber(cell);
-                        riskPointer.setInitial(init);
+                        riskPointer.setInitial(Double.toString(init));
                         break;
                     case 5:
                         riskPointer.setRiskDisplayId(dataFormatter.formatCellValue(cell));
@@ -210,16 +210,16 @@ public class RisksExtractor {
     private void setErrorNumberIndicator(Risk riskPointer, int cellId) {
         switch (cellId) {
             case 1:
-                riskPointer.setProbability(-1f);
+                riskPointer.setProbability("-1");
                 break;
             case 2:
                 riskPointer.setRating(-1f);
                 break;
             case 3:
-                riskPointer.setPrevious(-1f);
+                riskPointer.setPrevious("-1");
                 break;
             case 4:
-                riskPointer.setInitial(-1f);
+                riskPointer.setInitial("-1");
                 break;
         }
     }

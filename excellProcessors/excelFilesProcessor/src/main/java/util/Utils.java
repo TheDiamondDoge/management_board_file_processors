@@ -99,10 +99,20 @@ public class Utils {
         }
     }
 
-    public static String getFormattedProbability(Float probability) {
+    public static String getFormattedProbability(String probString) {
+        Float probability = getFloat(probString);
         if (Objects.isNull(probability)) return "";
+
         double roundedToTwoDigits = Math.round(probability * 1000.0) / 1000.0;
         return (roundedToTwoDigits * 100)  + "%";
+    }
+
+    public static Float getFloat(String value) {
+        try {
+            return Float.parseFloat(value);
+        } catch (NumberFormatException e) {
+            return null;
+        }
     }
 
     public static void setCellValue(Cell cell, Float value) {

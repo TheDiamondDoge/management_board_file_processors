@@ -71,15 +71,15 @@ public class RisksExtractorTest {
     public void risksWithWrongNumberFormats_errDataFlagSet_errMsgSaved() throws WrongFileFormatException, IOException, NoSheetFoundException {
         RisksExtractor extractor = new RisksExtractor("src/test/resources/risks/risks_with_wrong_number_formats.xlsx");
         RisksDTO data = extractor.extract();
-        Float errorIndicator = -1f;
+//        String errorIndicator = "-1";
 
         int expectedRisksAmount = 6;
         List<Risk> risks = data.getRisks();
         assertEquals(expectedRisksAmount, risks.size());
-        assertEquals(errorIndicator, risks.get(0).getProbability());
-        assertEquals(errorIndicator, risks.get(0).getRating());
-        assertEquals(errorIndicator, risks.get(1).getPrevious());
-        assertEquals(errorIndicator, risks.get(2).getInitial());
+        assertEquals("-1", risks.get(0).getProbability());
+        assertEquals(new Float(-1f), risks.get(0).getRating());
+        assertEquals("-1", risks.get(1).getPrevious());
+        assertEquals("-1", risks.get(2).getInitial());
 
         int expectedErrorsAmount = 4;
         List<Error> errors = data.getErrors();

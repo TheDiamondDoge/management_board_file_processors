@@ -72,7 +72,7 @@ public class PlainXlsxCreatorTest {
                 if (i == 0) {
                     assertEquals(headers[j], cell.getStringCellValue());
                 } else if(i == 3 && j == 2) {
-                    Date dateExpected = Utils.getDateWithTimeFromString(data[i - 1][j]);
+                    Date dateExpected = Utils.getDateFromStringWithOrWoTime(data[i - 1][j]);
                     Date dateActual = cell.getDateCellValue();
                     assertEquals(dateExpected, dateActual);
                 } else {
