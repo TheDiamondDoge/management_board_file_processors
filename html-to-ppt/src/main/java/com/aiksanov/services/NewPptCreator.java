@@ -624,6 +624,26 @@ public class NewPptCreator {
         table.setAnchor(new Rectangle(2 * SLIDE_PADDING, currentY + SLIDE_PADDING, width, height));
     }
 
+    public void addImageOnNewSlide(List<PptImageFile> images) {
+        setCurrentSectionName(null);
+        for (PptImageFile image : images) {
+            createNewSlide();
+            String fileFormat = Utils.getFileFormat(image.getFilename());
+            XSLFPictureData slidePicture;
+            try {
+                slidePicture = ppt.addPicture(image.getImageInBytes(), PictureData.PictureType.valueOf(fileFormat));
+            } catch (Exception e) {
+                e.printStackTrace();
+                continue;
+            }
+
+            XSLFPictureShape pictureShape = currentSlide.createPicture(slidePicture);
+            int width = SLIDE_WIDTH - 2 * SLIDE_PADDING;
+            int height = SLIDE_HEIGHT - 2 * SLIDE_PADDING - currentY - footerSize;
+            pictureShape.setAnchor(new Rectangle(SLIDE_PADDING, currentY + SLIDE_PADDING, width, height));
+        }
+    }
+
     public String save(String filepath) throws IOException {
         File file = new File(filepath);
         FileOutputStream out = new FileOutputStream(file);

@@ -13,6 +13,7 @@ public class Options {
     private List<HtmlSection> otherInformation;
     private List<Requirements> requirements;
     private HealthIndicatorsDTO indicators;
+    private List<PptImageFile> images;
 
     public Options() {
     }
@@ -77,6 +78,15 @@ public class Options {
 
     public Options setIndicators(HealthIndicatorsDTO indicators) {
         this.indicators = indicators;
+        return this;
+    }
+
+    public List<PptImageFile> getImages() {
+        return images;
+    }
+
+    public Options setImages(List<PptImageFile> images) {
+        this.images = images;
         return this;
     }
 }

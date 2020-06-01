@@ -186,6 +186,8 @@ public class UtilsTest {
         assertEquals(IndicatorStatus.GREEN, Utils.getIndicatorsStatus(indicators, "schedule"));
         assertEquals(IndicatorStatus.YELLOW, Utils.getIndicatorsStatus(indicators, "scope"));
         assertEquals(IndicatorStatus.RED, Utils.getIndicatorsStatus(indicators, "quality"));
+
+        //Error will be suppressed, trace printed, black returned as default
         assertEquals(IndicatorStatus.BLANK, Utils.getIndicatorsStatus(indicators, "cost"));
 
         assertEquals(IndicatorStatus.BLANK, Utils.getIndicatorsStatus(null, "anylabel"));
@@ -215,5 +217,16 @@ public class UtilsTest {
         assertFalse(Utils.isListNotNullAndNotEmpty(riskList));
         assertFalse(Utils.isListNotNullAndNotEmpty(riskListEmpty));
         assertTrue(Utils.isListNotNullAndNotEmpty(withData));
+    }
+
+    @Test
+    public void testGetFileFormat() {
+        String filename1 = "1.jpeg";
+        String filename2 = "2.png";
+        String filename3 = "1.jpg";
+
+        assertEquals("JPEG", Utils.getFileFormat(filename1));
+        assertEquals("PNG", Utils.getFileFormat(filename2));
+        assertEquals("JPEG", Utils.getFileFormat(filename3));
     }
 }

@@ -4,8 +4,13 @@ import com.aiksanov.data.*;
 import com.aiksanov.enums.HealthStatus;
 import com.aiksanov.enums.RiskTypes;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.sql.Date;
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class TestDataInit {
     public HealthIndicatorsDTO getHealthIndicators() {
@@ -119,5 +124,25 @@ public class TestDataInit {
         result.add(new HtmlSection(yellowFlagTitle, test));
         result.add(new HtmlSection(greenFlagTitle, greenFlagHtml));
         return result;
+    }
+
+    public List<PptImageFile> getImages() throws IOException {
+        String imageFolderPath = "src\\test\\resources\\imgs";
+        List<Path> filePaths = Files.walk(Paths.get(imageFolderPath))
+                .filter(Files::isRegularFile)
+                .map(Path::toAbsolutePath)
+                .collect(Collectors.toList());
+
+        List<PptImageFile> imageFiles = filePaths.stream().map(path -> {
+            try {
+                byte[] bytes = Files.readAllBytes(path);
+                String filename = path.getName(path.getNameCount() - 1).toString();
+                return new PptImageFile(filename, bytes);
+            } catch (IOException e) {
+                return null;
+            }
+        }).filter(Objects::nonNull).collect(Collectors.toList());
+
+        return imageFiles;
     }
 }

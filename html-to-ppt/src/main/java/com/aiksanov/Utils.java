@@ -163,4 +163,10 @@ public class Utils {
     public static boolean isListNotNullAndNotEmpty(List<?> list) {
         return Objects.nonNull(list) && list.size() > 0;
     }
+
+    public static String getFileFormat(String filename) {
+        String[] chunks = filename.toUpperCase().split("\\.");
+        String format = chunks[chunks.length - 1];
+        return format.equals("JPG") ? "JPEG" : format;
+    }
 }

@@ -19,6 +19,7 @@ public class PptCreatorFacade {
         List<Requirements> requirements = options.getRequirements();
         Map<RiskTypes, List<Risk>> risks = options.getRisks();
         List<HtmlSection> otherInformation = options.getOtherInformation();
+        List<PptImageFile> imageFiles = options.getImages();
         Indicators indicators;
         try {
             indicators = options.getIndicators().getStatuses().get("current");
@@ -71,6 +72,11 @@ public class PptCreatorFacade {
             htmlExtractor.extract(createOneSection(otherInformation, false));
         }
 
+        //images
+        if (Objects.nonNull(imageFiles)) {
+            pptCreator.addImageOnNewSlide(imageFiles);
+        }
+
         return pptCreator.save(filepath);
     }
 
@@ -86,6 +92,7 @@ public class PptCreatorFacade {
         List<Requirements> requirements = options.getRequirements();
         Map<RiskTypes, List<Risk>> risks = options.getRisks();
         List<HtmlSection> otherInformation = options.getOtherInformation();
+        List<PptImageFile> imageFiles = options.getImages();
         Indicators indicators;
         try {
             indicators = options.getIndicators().getStatuses().get("current");
@@ -136,6 +143,11 @@ public class PptCreatorFacade {
             pptCreator.createNewSlide();
             pptCreator.addTextWorkingArea();
             htmlExtractor.extract(createOneSection(otherInformation, false));
+        }
+
+        //images
+        if (Objects.nonNull(imageFiles)) {
+            pptCreator.addImageOnNewSlide(imageFiles);
         }
 
         return pptCreator.save(out);

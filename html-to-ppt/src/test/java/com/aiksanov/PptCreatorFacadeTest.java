@@ -18,7 +18,7 @@ public class PptCreatorFacadeTest {
 
 
     @BeforeClass
-    public static void setUp() {
+    public static void setUp() throws IOException {
         options = getOptions();
     }
 
@@ -61,7 +61,7 @@ public class PptCreatorFacadeTest {
         facade.createExecReviewPpt(options, "createExecReviewPptWithAllNulls.pptx");
     }
 
-    private static Options getOptions() {
+    private static Options getOptions() throws IOException {
         TestDataInit dataInit = new TestDataInit();
         ProjectGeneral general = new ProjectGeneral("Project from Facade", "IKSANOV Aleksandr", "http://ya.ru", new java.util.Date());
         List<MilestoneDTO> milestones = dataInit.getMilestones();
@@ -70,6 +70,7 @@ public class PptCreatorFacadeTest {
         List<HtmlSection> otherInformation = dataInit.getOtherInformation();
         Map<RiskTypes, List<Risk>> risks = dataInit.getRisks();
         HealthIndicatorsDTO healthIndicators = dataInit.getHealthIndicators();
+        List<PptImageFile> images = dataInit.getImages();
 
         return new Options()
                 .setGeneralInfo(general)
@@ -78,7 +79,8 @@ public class PptCreatorFacadeTest {
                 .setRequirements(requirements)
                 .setIndicators(healthIndicators)
                 .setRisks(risks)
-                .setOtherInformation(otherInformation);
+                .setOtherInformation(otherInformation)
+                .setImages(images);
     }
 
     private static Options getOptionsWithAllNulls() {
