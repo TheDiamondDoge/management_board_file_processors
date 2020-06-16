@@ -69,6 +69,7 @@ public class PptCreatorService {
         String projectDetails = data.getProjectDetails();
         List<Requirements> requirements = data.getRequirements();
         HealthIndicatorsDTO indicators = data.getIndicators();
+        List<PptImageFile> imageFiles = data.getImages();
 
         List<HtmlSection> execSummarySection = getExecSummarySection(executionSummary, flags);
         Map<RiskTypes, List<Risk>> risksMap = getListRisksToMap(risks);
@@ -81,7 +82,8 @@ public class PptCreatorService {
                 .setRisks(risksMap)
                 .setOtherInformation(otherInfoSection)
                 .setRequirements(requirements)
-                .setIndicators(indicators);
+                .setIndicators(indicators)
+                .setImages(imageFiles);
     }
 
     private List<HtmlSection> getExecSummarySection(String executionSummary, List<String> flags) {

@@ -1,10 +1,6 @@
 package com.aiksanov.pptxProcessorsService.data;
 
-import com.aiksanov.data.MilestoneDTO;
-import com.aiksanov.data.ProjectGeneral;
-import com.aiksanov.data.Requirements;
-import com.aiksanov.data.Risk;
-import com.aiksanov.data.HealthIndicatorsDTO;
+import com.aiksanov.data.*;
 
 import java.util.List;
 
@@ -17,6 +13,7 @@ public class PptConfigurationData {
     private String projectDetails;
     private List<Requirements> requirements;
     private HealthIndicatorsDTO indicators;
+    private List<PptImageFile> images;
 
     public PptConfigurationData() {
     }
@@ -83,5 +80,13 @@ public class PptConfigurationData {
 
     public void setIndicators(HealthIndicatorsDTO indicators) {
         this.indicators = indicators;
+    }
+
+    public List<PptImageFile> getImages() {
+        return images;
+    }
+
+    public void setImages(List<PptImageFile> images) {
+        this.images = images;
     }
 }
