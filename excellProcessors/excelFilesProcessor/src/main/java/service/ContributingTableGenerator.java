@@ -88,7 +88,10 @@ public class ContributingTableGenerator {
             cell.setCellStyle(getDefaultStyle());
 
             if (monthIndex % 12 == 0 || i == monthsBetween) {
-                sheet.addMergedRegion(new CellRangeAddress(1, 1, yearStartPosition, cellIndex));
+                if (cellIndex - yearStartPosition > 1) {
+                    sheet.addMergedRegion(new CellRangeAddress(1, 1, yearStartPosition, cellIndex));
+                }
+
                 XSSFCell yearCell = yearRow.createCell(yearStartPosition);
                 yearCell.setCellValue(startYear + yearsPassed);
                 yearCell.setCellStyle(getDefaultStyle());
